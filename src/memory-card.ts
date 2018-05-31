@@ -26,9 +26,13 @@ export class MemoryCard implements AsyncMap {
   private file?   : string
 
   constructor(
-    public name = 'default',
+    public name?: null | string,
   ) {
     log.verbose('MemoryCard', 'constructor(%s)', name)
+
+    if (typeof name === 'undefined') {
+      name = 'default'
+    }
 
     this.payload = {}
 

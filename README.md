@@ -8,11 +8,18 @@ Memory Card is an Easy to Use Key/Value Store, with Swagger API Backend &amp; Se
 
 ![Memory Card](https://zixia.github.io/memory-card/images/memory-card-logo.png)
 
+## TODO
+
+1. Swagger API Backend Support
+1. toJSON Serializable with Metadata
+
 ## CHANGELOG
 
 ### v0.2 master (Jun 2018)
 
-WIP...
+1. Unit Testing
+1. NPM Pack Testing
+1. DevOps to NPM with `@next` tag support for developing branch
 
 ### v0.0 May 31st, 2018
 
