@@ -1,0 +1,64 @@
+{
+  "name": "memory-card",
+  "version": "0.0.1",
+  "description": "ES6 Map like Async API, with Swagger API Backend Support.",
+  "main": "src/index.js",
+  "typings": "src/index.d.ts",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "clean": "shx rm -fr dist/*",
+    "dist": "npm run clean && tsc && shx cp {README.md,LICENSE,package.json} dist/",
+    "pack": "npm pack dist/",
+    "lint": "npm run lint:ts",
+    "lint:ts": "tslint --project tsconfig.json && tsc --noEmit",
+    "test": "npm run lint && npm run test:unit",
+    "test:unit": "blue-tape -r ts-node/register \"src/**/*.spec.ts\" \"tests/**/*.spec.ts\"",
+    "test:pack": "bash -x scripts/npm-pack-testing.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zixia/memory-card.git"
+  },
+  "keywords": [
+    "async",
+    "map",
+    "swagger",
+    "openapi",
+    "key",
+    "value",
+    "store"
+  ],
+  "author": "Huan LI <zixia@zixia.net>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/zixia/memory-card/issues"
+  },
+  "homepage": "https://github.com/zixia/memory-card#readme",
+  "devDependencies": {
+    "@types/blue-tape": "^0.1.31",
+    "@types/node": "^10.1.4",
+    "@types/semver": "^5.5.0",
+    "blue-tape": "^1.0.0",
+    "git-scripts": "^0.2.1",
+    "semver": "^5.5.0",
+    "shx": "^0.2.2",
+    "ts-node": "^6.0.5",
+    "tslint": "^5.10.0",
+    "typescript": "^2.8.4"
+  },
+  "git": {
+    "scripts": {
+      "pre-push": "./scripts/pre-push.sh"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
+  },
+  "dependencies": {
+    "brolog": "^1.6.2"
+  }
+}
