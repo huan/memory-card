@@ -1,6 +1,6 @@
 # MEMORY CARD
 
-[![NPM Version](https://badge.fury.io/js/flash-store.svg)](https://badge.fury.io/js/flash-store)
+[![NPM Version](https://badge.fury.io/js/memory-card.svg)](https://badge.fury.io/js/memory-card)
 [![Powered by TypeScript](https://img.shields.io/badge/Powered%20By-TypeScript-blue.svg)](https://www.typescriptlang.org/)
 [![Build Status](https://travis-ci.com/zixia/memory-card.svg?branch=master)](https://travis-ci.com/zixia/memory-card)
 
