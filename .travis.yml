@@ -4,9 +4,9 @@ os:
 
 language: node_js
 node_js:
-  - '8'
-  - '9'
   - '10'
+  - '9'
+  - '8'
 
 cache:
   directories:
@@ -39,6 +39,9 @@ jobs:
         - npm version
         - if ./scripts/development-release.ts; then ./scripts/package-publish-config-tag-next.ts; fi
         - npm run dist
+
+      before_deploy:
+        - cd dist/
 
       deploy:
         provider: npm
