@@ -22,39 +22,33 @@ export interface MemorySchema {
 export type MemorySection = keyof MemorySchema
 
 export class MemoryCard implements AsyncMap {
+
   private payload : MemorySchema
   private file?   : string
 
   constructor(
-    public name?: null | string,
+    public name?: string,
   ) {
-    log.verbose('MemoryCard', 'constructor(%s)', name)
-
-    if (typeof name === 'undefined') {
-      name = 'default'
-    }
+    log.verbose('MemoryCard', 'constructor(%s)', name || '')
 
     this.payload = {}
 
-    if (!name) {
-      this.file = undefined
-    } else {
+    if (name) {
       this.file = path.isAbsolute(name)
         ? name
         : path.resolve(
             process.cwd(),
             name,
           )
-      if (!/\.wechaty\.json$/.test(this.file)) {
-        this.file +=  '.wechaty.json'
+      if (!/\.memory-card\.json$/.test(this.file)) {
+        this.file +=  '.memory-card.json'
       }
     }
 
-    this.payload = {}
   }
 
   public toString() {
-    return `MemoryCard<${this.name}>`
+    return `MemoryCard<${this.name || ''}>`
   }
 
   public version(): string {
