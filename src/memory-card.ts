@@ -168,14 +168,14 @@ export class MemoryCard implements AsyncMap {
 
   public async *keys(): AsyncIterableIterator<string> {
     log.verbose('MemoryCard', 'keys()')
-    for (const key in this.payload) {
+    for (const slot in this.payload) {
       yield slot
     }
   }
 
   public async *values<T = any>(): AsyncIterableIterator<T> {
     log.verbose('MemoryCard', 'values()')
-    for (const key in this.payload) {
+    for (const slot in this.payload) {
       yield this.payload[key]
     }
   }
