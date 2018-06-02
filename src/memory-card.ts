@@ -19,7 +19,7 @@ export interface MemorySchema {
   [idx: string] : any
 }
 
-export type MemorySection = keyof MemorySchema
+export type MemorySlot = keyof MemorySchema
 
 export class MemoryCard implements AsyncMap {
 
@@ -109,20 +109,21 @@ export class MemoryCard implements AsyncMap {
     }
   }
 
-  public async get<T = any>(section: MemorySection): Promise<undefined | T> {
-    log.verbose('MemoryCard', 'get(%s)', section)
+  public async get<T = any>(slot: MemorySlot): Promise<undefined | T> {
+    log.verbose('MemoryCard', 'get(%s)', slot
+                               )
     if (!this.payload) {
       return undefined
     }
     return this.payload[section] as any as T
   }
 
-  public async set<T = any>(section: MemorySection, data: T): Promise<void> {
-    log.verbose('MemoryCard', 'set(%s, %s)', section, data)
+  public async set<T = any>(section: MemorySlot, data: T): Promise<void> {
+    log.verbose('MemoryCard', 'set(%s, %s)', slot, data)
     if (!this.payload) {
       this.payload = {}
     }
-    this.payload[section] = data
+    this.payload[slot] = data
   }
 
   public async destroy(): Promise<void> {
@@ -142,9 +143,9 @@ export class MemoryCard implements AsyncMap {
   public async* entries<T = any>(): AsyncIterableIterator<[string, T]> {
     log.verbose('MemoryCard', '*entries()')
 
-    for (const key in this.payload) {
-      const value = this.payload[key] as T
-      const pair: [string, T] = [key, value]
+    for (const slot in this.payload) {
+      const value = this.payload[slot] as T
+      const pair: [string, T] = [slot, data]
       yield pair
     }
   }
@@ -154,21 +155,21 @@ export class MemoryCard implements AsyncMap {
     this.payload = {}
   }
 
-  public async delete(key: string): Promise<void> {
-    log.verbose('MemoryCard', 'delete(%s)', key)
-    delete this.payload[key]
+  public async delete(slot: MemortSlot): Promise<void> {
+    log.verbose('MemoryCard', 'delete(%s)', slot)
+    delete this.payload[slot]
   }
 
-  public async has(key: string): Promise<boolean> {
-    log.verbose('MemoryCard', 'has(%s)', key)
+  public async has(slot: MemortSlot): Promise<boolean> {
+    log.verbose('MemoryCard', 'has(%s)', slot)
 
-    return key in this.payload
+    return slot in this.payload
   }
 
   public async *keys(): AsyncIterableIterator<string> {
     log.verbose('MemoryCard', 'keys()')
     for (const key in this.payload) {
-      yield key
+      yield slot
     }
   }
 
