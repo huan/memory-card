@@ -19,7 +19,7 @@ export interface MemorySchema {
   [idx: string] : any
 }
 
-export type MemorySlot = keyof MemorySchema
+export type SlotName = keyof MemorySchema
 
 export class MemoryCard implements AsyncMap {
 
@@ -57,7 +57,6 @@ export class MemoryCard implements AsyncMap {
 
   public async load(): Promise<void> {
     log.verbose('MemoryCard', 'load() file: %s', this.file)
-    this.payload = {}
 
     const file = this.file
     if (!file) {
@@ -96,7 +95,7 @@ export class MemoryCard implements AsyncMap {
       return
     }
     if (!this.payload) {
-      log.verbose('MemoryCard', 'save() no obj, NOOP')
+      log.verbose('MemoryCard', 'save() no payload, NOOP')
       return
     }
 
@@ -109,33 +108,26 @@ export class MemoryCard implements AsyncMap {
     }
   }
 
-  public async get<T = any>(slot: MemorySlot): Promise<undefined | T> {
-    log.verbose('MemoryCard', 'get(%s)', slot
-                               )
-    if (!this.payload) {
-      return undefined
-    }
-    return this.payload[section] as any as T
+  public async get<T = any>(slot: SlotName): Promise<undefined | T> {
+    log.verbose('MemoryCard', 'get(%s)', slot)
+    return this.payload[slot] as T
   }
 
-  public async set<T = any>(section: MemorySlot, data: T): Promise<void> {
+  public async set<T = any>(slot: SlotName, data: T): Promise<void> {
     log.verbose('MemoryCard', 'set(%s, %s)', slot, data)
-    if (!this.payload) {
-      this.payload = {}
-    }
     this.payload[slot] = data
   }
 
   public async destroy(): Promise<void> {
     log.verbose('MemoryCard', 'destroy() file: %s', this.file)
-    this.payload = {}
+    await this.clear()
     if (this.file && fs.existsSync(this.file)) {
       fs.unlinkSync(this.file)
       this.file = undefined
     }
   }
 
-  public async *[Symbol.asyncIterator]<T = any>(): AsyncIterableIterator<[string, T]> {
+  public async* [Symbol.asyncIterator]<T = any>(): AsyncIterableIterator<[string, T]> {
     log.verbose('MemoryCard', '*[Symbol.asyncIterator]()')
     yield* this.entries()
   }
@@ -144,7 +136,7 @@ export class MemoryCard implements AsyncMap {
     log.verbose('MemoryCard', '*entries()')
 
     for (const slot in this.payload) {
-      const value = this.payload[slot] as T
+      const data: T           = this.payload[slot]
       const pair: [string, T] = [slot, data]
       yield pair
     }
@@ -155,12 +147,12 @@ export class MemoryCard implements AsyncMap {
     this.payload = {}
   }
 
-  public async delete(slot: MemortSlot): Promise<void> {
+  public async delete(slot: SlotName): Promise<void> {
     log.verbose('MemoryCard', 'delete(%s)', slot)
     delete this.payload[slot]
   }
 
-  public async has(slot: MemortSlot): Promise<boolean> {
+  public async has(slot: SlotName): Promise<boolean> {
     log.verbose('MemoryCard', 'has(%s)', slot)
 
     return slot in this.payload
@@ -176,7 +168,7 @@ export class MemoryCard implements AsyncMap {
   public async *values<T = any>(): AsyncIterableIterator<T> {
     log.verbose('MemoryCard', 'values()')
     for (const slot in this.payload) {
-      yield this.payload[key]
+      yield this.payload[slot]
     }
   }
 
