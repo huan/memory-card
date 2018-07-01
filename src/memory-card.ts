@@ -26,6 +26,13 @@ export class MemoryCard implements AsyncMap {
   private payload : MemorySchema
   private file?   : string
 
+  public get size(): Promise<number> {
+    log.verbose('MemoryCard', 'size')
+    return Promise.resolve(
+      Object.keys(this.payload).length,
+    )
+  }
+
   constructor(
     public name?: string,
   ) {
@@ -170,11 +177,6 @@ export class MemoryCard implements AsyncMap {
     for (const slot in this.payload) {
       yield this.payload[slot]
     }
-  }
-
-  public async size(): Promise<number> {
-    log.verbose('MemoryCard', 'size()')
-    return Object.keys(this.payload).length
   }
 }
 
