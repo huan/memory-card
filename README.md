@@ -8,6 +8,38 @@ Memory Card is an Easy to Use Key/Value Store, with Swagger API Backend &amp; Se
 
 ![Memory Card](https://zixia.github.io/memory-card/images/memory-card-logo.png)
 
+## API
+
+```ts
+/**
+ * ES6 Map like Async API
+ */
+export interface AsyncMap<K = any, V = any> {
+  size: Promise<number>
+
+  [Symbol.asyncIterator](): AsyncIterableIterator<[K, V]>
+  entries()                  : AsyncIterableIterator<[K, V]>
+  keys    ()                 : AsyncIterableIterator<K>
+  values  ()                 : AsyncIterableIterator<V>
+
+  get     (key: K)           : Promise<V | undefined>
+  set     (key: K, value: V) : Promise<void>
+  has     (key: K)           : Promise<boolean>
+  delete  (key: K)           : Promise<void>
+  clear   ()                 : Promise<void>
+}
+
+export class MemoryCard implements AsyncMap { ... }
+```
+
+### 1. load()
+
+### 2. save()
+
+### 3. destroy()
+
+### 4. sub()
+
 ## TODO
 
 1. Swagger API Backend Support
@@ -15,7 +47,11 @@ Memory Card is an Easy to Use Key/Value Store, with Swagger API Backend &amp; Se
 
 ## CHANGELOG
 
-### v0.2 master (Jun 2018)
+### v0.4 master (July 2018)
+
+1. Add `sub()` method to Multiplex MemoryStore to sub-MemoryStores.
+
+### v0.2 (June 2018)
 
 1. Unit Testing
 1. NPM Pack Testing
@@ -24,7 +60,7 @@ Memory Card is an Easy to Use Key/Value Store, with Swagger API Backend &amp; Se
 ### v0.0 May 31st, 2018
 
 1. Promote `Profile` of Wechaty to SOLO NPM Module: `MemoryCard`
-1. Update the API to ES6 `Map`-like, the difference is that MemoryCard is all **async**.
+1. Update the API to ES6 `Map`-like, the difference is that MemoryCard is all **Async**.
 
 ## AUTHOR
 

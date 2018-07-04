@@ -19,8 +19,7 @@
     , "outDir": "dist"
 
     , "lib": [
-        "dom"
-      , "esnext"
+      "esnext"
     ]
     , "target": "es6"
     , "module": "commonjs"

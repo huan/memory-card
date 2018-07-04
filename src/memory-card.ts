@@ -3,8 +3,8 @@
 //   (<any>Symbol).asyncIterator =  Symbol.for('Symbol.asyncIterator')
 // }
 
-import * as path from 'path'
-import * as fs   from 'fs'
+import * as nodePath  from 'path'
+import * as fs        from 'fs'
 
 import {
   log,
@@ -14,36 +14,50 @@ import {
   AsyncMap,
 }             from './async-map.type'
 
-export interface MemorySchema {
-  // cookies?      : any
-  [idx: string] : any
-}
+export const NAMESPACE_SUB_SEPRATOR = '\r'
+export const NAMESPACE_KEY_SEPRATOR = '\n'
 
-export type SlotName = keyof MemorySchema
+const NAMESPACE_SUB_SEPRATOR_REGEX = new RegExp(NAMESPACE_SUB_SEPRATOR)
+const NAMESPACE_KEY_SEPRATOR_REGEX = new RegExp(NAMESPACE_KEY_SEPRATOR)
 
 export class MemoryCard implements AsyncMap {
 
-  private payload : MemorySchema
-  private file?   : string
+  protected payload     : { [idx: string]: any }
+  protected subNameList : string[]
 
-  public get size(): Promise<number> {
-    log.verbose('MemoryCard', 'size')
-    return Promise.resolve(
-      Object.keys(this.payload).length,
-    )
+  protected file?   : string
+
+  protected static sub<T extends typeof MemoryCard>(
+    this: T,
+    memory : MemoryCard,
+    name   : string,
+  ): T['prototype'] {
+    log.verbose('MemoryCard', 'static sub(%s, %s)', memory, name)
+
+    const subMemory = new this(memory.name)
+
+    subMemory.payload = memory.payload
+
+    subMemory.subNameList = [
+      ...memory.subNameList,
+      name,
+    ]
+
+    return subMemory
   }
 
   constructor(
-    public name?: string,
+    public name: null | string = null,
   ) {
     log.verbose('MemoryCard', 'constructor(%s)', name || '')
 
-    this.payload = {}
+    this.payload     = {}
+    this.subNameList = []
 
     if (name) {
-      this.file = path.isAbsolute(name)
+      this.file = nodePath.isAbsolute(name)
         ? name
-        : path.resolve(
+        : nodePath.resolve(
             process.cwd(),
             name,
           )
@@ -51,11 +65,16 @@ export class MemoryCard implements AsyncMap {
         this.file +=  '.memory-card.json'
       }
     }
-
   }
 
   public toString() {
-    return `MemoryCard<${this.name || ''}>`
+    let subString = ''
+    if (this.subNameList.length > 0) {
+      subString = this.subNameList
+                        .map(subPath => `.sub(${subPath})`)
+                        .join('')
+    }
+    return `MemoryCard<${this.name || ''}>${subString}`
   }
 
   public version(): string {
@@ -64,6 +83,10 @@ export class MemoryCard implements AsyncMap {
 
   public async load(): Promise<void> {
     log.verbose('MemoryCard', 'load() file: %s', this.file)
+
+    if (this.isSub()) {
+      return
+    }
 
     const file = this.file
     if (!file) {
@@ -115,23 +138,114 @@ export class MemoryCard implements AsyncMap {
     }
   }
 
-  public async get<T = any>(slot: SlotName): Promise<undefined | T> {
-    log.verbose('MemoryCard', 'get(%s)', slot)
-    return this.payload[slot] as T
+  /**
+   * Sub() related functions START
+   */
+
+  protected isSubKey(key: string): boolean {
+    if (   NAMESPACE_SUB_SEPRATOR_REGEX.test(key)
+        && NAMESPACE_KEY_SEPRATOR_REGEX.test(key)
+    ) {
+      const namespace = this.subNamespace()
+      return key.startsWith(namespace)
+
+    }
+    return false
   }
 
-  public async set<T = any>(slot: SlotName, data: T): Promise<void> {
-    log.verbose('MemoryCard', 'set(%s, %s)', slot, data)
-    this.payload[slot] = data
+  protected subNamespace(): string {
+    if (!this.isSub()) {
+      throw new Error('not a sub memory')
+    }
+
+    const namespace = NAMESPACE_SUB_SEPRATOR
+                      + this.subNameList.join(NAMESPACE_SUB_SEPRATOR)
+    return namespace
   }
+
+  protected resolveKey(name: string): string {
+    if (this.isSub()) {
+      const namespace = this.subNamespace()
+      return [
+        namespace,
+        name,
+      ].join(NAMESPACE_KEY_SEPRATOR)
+    } else {
+      return name
+    }
+  }
+
+  public isSub(): boolean {
+    return this.subNameList.length > 0
+  }
+
+  public sub (name: string): this {
+    log.verbose('MemoryCard', 'sub(%s)', name)
+
+    // FIXME: as any ?
+    return (this.constructor as any).sub(this, name)
+  }
+
+  /**
+   *
+   * Sub() related functions END
+   *
+   */
 
   public async destroy(): Promise<void> {
     log.verbose('MemoryCard', 'destroy() file: %s', this.file)
+
+    if (this.isSub()) {
+      throw new Error('can not destroy on a sub memory')
+    }
+
     await this.clear()
     if (this.file && fs.existsSync(this.file)) {
       fs.unlinkSync(this.file)
       this.file = undefined
     }
+  }
+
+  /**
+   *
+   * ES6 Map API (Async Version)
+   *
+   * BEGIN
+   *
+   */
+
+  /**
+   * size
+   */
+  public get size(): Promise<number> {
+    log.verbose('MemoryCard', 'size')
+
+    let count
+
+    if (this.isSub()) {
+      count = Object.keys(this.payload)
+                    .filter(key => this.isSubKey(key))
+                    .length
+    } else {
+      count = Object.keys(this.payload).length
+    }
+    return Promise.resolve(count)
+  }
+
+  public async get<T = any>(name: string): Promise<undefined | T> {
+    log.verbose('MemoryCard', 'get(%s)', name)
+
+    const key = this.resolveKey(name)
+
+    return this.payload[key]
+  }
+
+  public async set<T = any>(name: string, data: T): Promise<void> {
+    log.verbose('MemoryCard', 'set(%s, %s)', name, data)
+
+    const key = this.resolveKey(name)
+
+    this.payload[key] = data
   }
 
   public async* [Symbol.asyncIterator]<T = any>(): AsyncIterableIterator<[string, T]> {
@@ -142,42 +256,75 @@ export class MemoryCard implements AsyncMap {
   public async* entries<T = any>(): AsyncIterableIterator<[string, T]> {
     log.verbose('MemoryCard', '*entries()')
 
-    for (const slot in this.payload) {
-      const data: T           = this.payload[slot]
-      const pair: [string, T] = [slot, data]
+    for await (const relativeKey of this.keys()) {
+      const absoluteKey       = this.resolveKey(relativeKey)
+      const data: T           = this.payload[absoluteKey]
+
+      const pair: [string, T] = [relativeKey, data]
       yield pair
     }
   }
 
   public async clear(): Promise<void> {
     log.verbose('MemoryCard', 'clear()')
-    this.payload = {}
+
+    if (this.isSub()) {
+      for (const key in this.payload) {
+        if (this.isSubKey(key)) {
+          delete this.payload[key]
+        }
+      }
+    } else {
+      this.payload = {}
+    }
   }
 
-  public async delete(slot: SlotName): Promise<void> {
-    log.verbose('MemoryCard', 'delete(%s)', slot)
-    delete this.payload[slot]
+  public async delete(name: string): Promise<void> {
+    log.verbose('MemoryCard', 'delete(%s)', name)
+
+    const key = this.resolveKey(name)
+    delete this.payload[key]
   }
 
-  public async has(slot: SlotName): Promise<boolean> {
-    log.verbose('MemoryCard', 'has(%s)', slot)
+  public async has(key: string): Promise<boolean> {
+    log.verbose('MemoryCard', 'has(%s)', key)
 
-    return slot in this.payload
+    const absoluteKey = this.resolveKey(key)
+    return absoluteKey in this.payload
   }
 
   public async *keys(): AsyncIterableIterator<string> {
     log.verbose('MemoryCard', 'keys()')
-    for (const slot in this.payload) {
-      yield slot
+    for (const key in this.payload) {
+      // console.log('key', key)
+      if (this.isSub()) {
+        if (this.isSubKey(key)) {
+          const namespace = this.subNamespace()
+          // `+1` means there's another NAMESPACE_KEY_SEPRATOR we need to trim
+          const subKey = key.substr(namespace.length + 1)
+          yield subKey
+        }
+        continue
+      }
+      yield key
     }
   }
 
   public async *values<T = any>(): AsyncIterableIterator<T> {
     log.verbose('MemoryCard', 'values()')
-    for (const slot in this.payload) {
-      yield this.payload[slot]
+    for await (const relativeKey of this.keys()) {
+      const absoluteKey = this.resolveKey(relativeKey)
+      yield this.payload[absoluteKey]
     }
   }
+
+  /**
+   *
+   * ES6 Map API (Async Version)
+   *
+   * END
+   *
+   */
 }
 
 export default MemoryCard
