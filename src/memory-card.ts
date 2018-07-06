@@ -118,7 +118,10 @@ export class MemoryCard implements AsyncMap {
   }
 
   public async save (): Promise<void> {
-    log.verbose('MemoryCard', 'save() file: %s', this.file)
+    log.verbose('MemoryCard', '<%s> save() file: %s',
+                              this.sub(),
+                              this.file,
+                )
 
     if (this.isSub()) {
       if (!this.parent) {
@@ -187,11 +190,18 @@ export class MemoryCard implements AsyncMap {
     return this.subNameList.length > 0
   }
 
-  public sub (name: string): this {
-    log.verbose('MemoryCard', 'sub(%s)', name)
+  public sub (name: string): this
+  public sub (): string
 
-    // FIXME: as any ?
-    return (this.constructor as any).sub(this, name)
+  public sub (name?: string): this | string {
+    log.verbose('MemoryCard', 'sub(%s)', name || '')
+
+    if (name) {
+      // FIXME: as any ?
+      return (this.constructor as any).sub(this, name)
+    } else {
+      return this.subNameList.join('/')
+    }
   }
 
   /**
@@ -226,7 +236,7 @@ export class MemoryCard implements AsyncMap {
    * size
    */
   public get size (): Promise<number> {
-    log.verbose('MemoryCard', 'size')
+    log.verbose('MemoryCard', '<%s> size', this.sub())
 
     let count
 
@@ -241,7 +251,7 @@ export class MemoryCard implements AsyncMap {
   }
 
   public async get<T = any> (name: string): Promise<undefined | T> {
-    log.verbose('MemoryCard', 'get(%s)', name)
+    log.verbose('MemoryCard', '<%s> get(%s)', this.sub(), name)
 
     const key = this.resolveKey(name)
 
@@ -249,7 +259,7 @@ export class MemoryCard implements AsyncMap {
   }
 
   public async set<T = any> (name: string, data: T): Promise<void> {
-    log.verbose('MemoryCard', 'set(%s, %s)', name, data)
+    log.verbose('MemoryCard', '<%s> set(%s, %s)', this.sub(), name, data)
 
     const key = this.resolveKey(name)
 
@@ -257,12 +267,12 @@ export class MemoryCard implements AsyncMap {
   }
 
   public async* [Symbol.asyncIterator]<T = any> (): AsyncIterableIterator<[string, T]> {
-    log.verbose('MemoryCard', '*[Symbol.asyncIterator]()')
+    log.verbose('MemoryCard', '<%s> *[Symbol.asyncIterator]()', this.sub())
     yield* this.entries()
   }
 
   public async* entries<T = any> (): AsyncIterableIterator<[string, T]> {
-    log.verbose('MemoryCard', '*entries()')
+    log.verbose('MemoryCard', '<%s> *entries()', this.sub())
 
     for await (const relativeKey of this.keys()) {
       const absoluteKey       = this.resolveKey(relativeKey)
@@ -274,7 +284,7 @@ export class MemoryCard implements AsyncMap {
   }
 
   public async clear (): Promise<void> {
-    log.verbose('MemoryCard', 'clear()')
+    log.verbose('MemoryCard', '<%s> clear()', this.sub())
 
     if (this.isSub()) {
       for (const key in this.payload) {
@@ -288,21 +298,21 @@ export class MemoryCard implements AsyncMap {
   }
 
   public async delete (name: string): Promise<void> {
-    log.verbose('MemoryCard', 'delete(%s)', name)
+    log.verbose('MemoryCard', '<%s> delete(%s)', this.sub(), name)
 
     const key = this.resolveKey(name)
     delete this.payload[key]
   }
 
   public async has (key: string): Promise<boolean> {
-    log.verbose('MemoryCard', 'has(%s)', key)
+    log.verbose('MemoryCard', '<%s> has(%s)', this.sub(), key)
 
     const absoluteKey = this.resolveKey(key)
     return absoluteKey in this.payload
   }
 
   public async *keys (): AsyncIterableIterator<string> {
-    log.verbose('MemoryCard', 'keys()')
+    log.verbose('MemoryCard', '<%s> keys()', this.sub())
     for (const key of Object.keys(this.payload)) {
       // console.log('key', key)
       if (this.isSub()) {
@@ -319,7 +329,7 @@ export class MemoryCard implements AsyncMap {
   }
 
   public async *values<T = any> (): AsyncIterableIterator<T> {
-    log.verbose('MemoryCard', 'values()')
+    log.verbose('MemoryCard', '<%s> values()', this.sub())
     for await (const relativeKey of this.keys()) {
       const absoluteKey = this.resolveKey(relativeKey)
       yield this.payload[absoluteKey]

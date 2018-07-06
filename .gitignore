@@ -64,3 +64,4 @@ typings/
 package-lock.json
 t/
 t.*
+/*.memory-card.json

@@ -358,10 +358,11 @@ test('sub isSubKey()', async t => {
 })
 
 test('sub save()', async t => {
-  const NAME = 'a'
+  const MEMORY_NAME = 'unit-test-memory-name'
+  const SUB_NAME    = 'unit-test-sub-name'
 
-  const card = new MemoryCardTest()
-  const cardA = card.sub(NAME)
+  const card  = new MemoryCardTest(MEMORY_NAME)
+  const cardA = card.sub(SUB_NAME)
 
   const sandbox = sinon.createSandbox()
 
@@ -370,5 +371,6 @@ test('sub save()', async t => {
   await cardA.save()
   t.equal(stub.callCount, 1, 'sub memory should call parent save()')
 
+  await card.destroy()
   sandbox.restore()
 })
