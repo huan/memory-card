@@ -21,6 +21,10 @@ class MemoryCardTest extends MemoryCard {
     return super.resolveKey(key)
   }
 
+  public subPath (): string {
+    return super.subPath()
+  }
+
   public isSubKey (key: string): boolean {
     return super.isSubKey(key)
   }
@@ -373,4 +377,17 @@ test('sub save()', async t => {
 
   await card.destroy()
   sandbox.restore()
+})
+
+test('sub subPath()', async t => {
+  const SUB_NAME_A    = 'unit-test-sub-name-a'
+  const SUB_NAME_B    = 'unit-test-sub-name-b'
+
+  const EXPECTED_SUB_PATH = [SUB_NAME_A, SUB_NAME_B].join('/')
+
+  const card = new MemoryCardTest()
+  const cardA = card.sub(SUB_NAME_A)
+  const cardB = cardA.sub(SUB_NAME_B)
+
+  t.equal(cardB.subPath(), EXPECTED_SUB_PATH, 'should get sub path right')
 })
