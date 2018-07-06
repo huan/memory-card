@@ -1,6 +1,6 @@
 import { MemoryCard } from 'memory-card'
 
-async function main() {
+async function main () {
   try {
     const card = new MemoryCard()
     await card.set('a', 'b')

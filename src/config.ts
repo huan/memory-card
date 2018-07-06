@@ -9,4 +9,12 @@ export {
   log,
 }           from 'brolog'
 
-export const VERSION: string = require('../package.json').version
+let version = '0.0.0'
+
+try {
+  version = require('../../package.json').version
+} catch (e) {
+  version = require('../package.json')
+}
+
+export const VERSION = version
