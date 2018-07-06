@@ -1,8 +1,8 @@
 #!/usr/bin/env ts-node
 
 // tslint:disable:no-shadowed-variable
-import sinon  from 'sinon'
 import test   from 'blue-tape'
+import sinon  from 'sinon'
 
 import {
   MemoryCard,
@@ -11,17 +11,17 @@ import {
 }                           from './memory-card'
 
 class MemoryCardTest extends MemoryCard {
-  public get payload() {
+  public get payload () {
     return super.payload
   }
-  public set payload(data: object) {
+  public set payload (data: object) {
     super.payload = data
   }
-  public resolveKey(key: string): string {
+  public resolveKey (key: string): string {
     return super.resolveKey(key)
   }
 
-  public isSubKey(key: string): boolean {
+  public isSubKey (key: string): boolean {
     return super.isSubKey(key)
   }
 }
@@ -367,7 +367,7 @@ test('sub save()', async t => {
 
   const stub = sandbox.stub(card, 'save').callsFake(() => { /* void */ })
 
-  cardA.save()
+  await cardA.save()
   t.equal(stub.callCount, 1, 'sub memory should call parent save()')
 
   sandbox.restore()

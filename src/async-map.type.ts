@@ -4,10 +4,10 @@
 export interface AsyncMap<K = any, V = any> {
   size: Promise<number>
 
-  [Symbol.asyncIterator](): AsyncIterableIterator<[K, V]>
-  entries()                  : AsyncIterableIterator<[K, V]>
-  keys    ()                 : AsyncIterableIterator<K>
-  values  ()                 : AsyncIterableIterator<V>
+  [Symbol.asyncIterator] () : AsyncIterableIterator<[K, V]>
+  entries                () : AsyncIterableIterator<[K, V]>
+  keys                   () : AsyncIterableIterator<K>
+  values                 () : AsyncIterableIterator<V>
 
   get     (key: K)           : Promise<V | undefined>
   set     (key: K, value: V) : Promise<void>

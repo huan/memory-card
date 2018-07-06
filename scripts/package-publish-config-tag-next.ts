@@ -1,4 +1,8 @@
 #!/usr/bin/env ts-node
+
+// tslint:disable:no-console
+// tslint:disable:no-var-requires
+
 import * as fs    from 'fs'
 import * as path  from 'path'
 
@@ -7,7 +11,8 @@ const PACKAGE_JSON = path.join(__dirname, '../package.json')
 const pkg = require(PACKAGE_JSON)
 
 pkg.publishConfig = {
-  ...(pkg.publishConfig || {}),
+  access: 'public',
+  ...pkg.publishConfig,
   tag: 'next',
 }
 

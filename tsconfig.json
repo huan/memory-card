@@ -1,43 +1,27 @@
 {
   "compilerOptions": {
-      "allowSyntheticDefaultImports": true
-    , "declaration": true
-    , "emitDecoratorMetadata": true
-    , "experimentalDecorators": true
-    , "skipLibCheck": true
-    , "noUnusedLocals": true
-    , "noImplicitReturns": true
-    , "noFallthroughCasesInSwitch": true
-    , "strictNullChecks": true
-    , "alwaysStrict": true
-    , "noImplicitAny": true
-    , "noImplicitThis": true
-    , "noUnusedParameters": true
-    , "esModuleInterop" : true
-
-    , "traceResolution": false
-
-    , "outDir": "dist"
-
-    , "lib": [
-      "esnext"
-    ]
-    , "target": "es6"
+    "target": "es6"
     , "module": "commonjs"
-    , "moduleResolution": "node"
+    , "outDir": "dist"
+    , "declaration": true
     , "sourceMap": true
+    , "strict": true
+    , "traceResolution": false
+    , "esModuleInterop" : true
+    , "resolveJsonModule": true
+    , "lib": [
+        "esnext"
+    ]
   }
-  , "include": [
-      "src/**/*.ts"
-    , "tests/**/*.ts"
-  ]
   , "exclude": [
-      "dist"
-    , "node_modules"
-    , "tests/fixtures/"
+      "node_modules/"
+    , "dist/"
   ]
-  , "compileOnSave": false
-  , "atom": {
-    "rewriteTsconfig": false
-  }
+  , "include": [
+       "bin/*.ts"
+     , "scripts/**/*.ts"
+     , "examples/**/*.ts"
+     , "src/**/*.ts"
+     , "tests/**/*.spec.ts"
+  ]
 }

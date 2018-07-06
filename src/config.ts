@@ -1,6 +1,8 @@
+// tslint:disable:no-var-requires
+
 // https://github.com/Microsoft/TypeScript/issues/14151#issuecomment-280812617
 if (!Symbol.asyncIterator) {
-  (<any>Symbol).asyncIterator = Symbol.for('Symbol.asyncIterator')
+  (Symbol as any).asyncIterator = Symbol.for('Symbol.asyncIterator')
 }
 
 export {
