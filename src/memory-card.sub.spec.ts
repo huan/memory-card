@@ -1,7 +1,8 @@
 #!/usr/bin/env ts-node
 
 // tslint:disable:no-shadowed-variable
-import * as test from 'blue-tape'
+import sinon  from 'sinon'
+import test   from 'blue-tape'
 
 import {
   MemoryCard,
@@ -354,4 +355,20 @@ test('sub isSubKey()', async t => {
 
   t.equal(card.isSubKey(NAME), false, 'card should identify any key as not sub key')
   t.equal(cardA.isSubKey(SUB_KEY), true, 'card a should identify SUB_KEY a sub key')
+})
+
+test('sub save()', async t => {
+  const NAME = 'a'
+
+  const card = new MemoryCardTest()
+  const cardA = card.sub(NAME)
+
+  const sandbox = sinon.createSandbox()
+
+  const stub = sandbox.stub(card, 'save').callsFake(() => { /* void */ })
+
+  cardA.save()
+  t.equal(stub.callCount, 1, 'sub memory should call parent save()')
+
+  sandbox.restore()
 })

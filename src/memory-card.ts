@@ -22,6 +22,7 @@ const NAMESPACE_KEY_SEPRATOR_REGEX = new RegExp(NAMESPACE_KEY_SEPRATOR)
 
 export class MemoryCard implements AsyncMap {
 
+  protected parent?     : MemoryCard
   protected payload     : { [idx: string]: any }
   protected subNameList : string[]
 
@@ -36,6 +37,7 @@ export class MemoryCard implements AsyncMap {
 
     const subMemory = new this(memory.name)
 
+    subMemory.parent  = memory
     subMemory.payload = memory.payload
 
     subMemory.subNameList = [
@@ -118,6 +120,13 @@ export class MemoryCard implements AsyncMap {
 
   public async save(): Promise<void> {
     log.verbose('MemoryCard', 'save() file: %s', this.file)
+
+    if (this.isSub()) {
+      if (!this.parent) {
+        throw new Error('sub memory no parent')
+      }
+      return this.parent.save()
+    }
 
     const file = this.file
     if (!file) {
