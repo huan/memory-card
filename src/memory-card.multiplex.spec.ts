@@ -7,7 +7,7 @@ import sinon  from 'sinon'
 import {
   MemoryCard,
   NAMESPACE_KEY_SEPRATOR,
-  NAMESPACE_SUB_SEPRATOR,
+  NAMESPACE_MULTIPLEX_SEPRATOR,
 }                           from './memory-card'
 
 class MemoryCardTest extends MemoryCard {
@@ -21,22 +21,22 @@ class MemoryCardTest extends MemoryCard {
     return super.resolveKey(key)
   }
 
-  public subPath (): string {
-    return super.subPath()
+  public multiplexPath (): string {
+    return super.multiplexPath()
   }
 
-  public isSubKey (key: string): boolean {
-    return super.isSubKey(key)
+  public isMultiplexKey (key: string): boolean {
+    return super.isMultiplexKey(key)
   }
 }
 
-test('sub set() & get()', async t => {
+test('multiplex set() & get()', async t => {
   const KEY = 'a'
   const VAL = 'b'
 
   const card = new MemoryCard()
-  const cardA = card.sub('a')
-  const cardB = card.sub('b')
+  const cardA = card.multiplex('a')
+  const cardB = card.multiplex('b')
 
   t.equal(await card.size,  0, 'init with 0 for card')
   t.equal(await cardA.size, 0, 'init with 0 for cardA')
@@ -75,13 +75,13 @@ test('sub set() & get()', async t => {
   await card.destroy()
 })
 
-test('sub clear()', async t => {
+test('multiplex clear()', async t => {
   const KEY = 'a'
   const VAL = 'b'
 
   const card = new MemoryCard()
-  const cardA = card.sub('a')
-  const cardB = card.sub('b')
+  const cardA = card.multiplex('a')
+  const cardB = card.multiplex('b')
 
   await card.set(KEY, VAL)
   await cardA.set(KEY, VAL)
@@ -104,14 +104,14 @@ test('sub clear()', async t => {
   await card.destroy()
 })
 
-test('sub deeper than two layers', async t => {
+test('multiplex deeper than two layers', async t => {
   const KEY = 'a'
   const VAL = 'b'
 
   const card    = new MemoryCardTest()
-  const cardA   = card.sub('a')
-  const cardAA  = cardA.sub('a')
-  const cardAAA = cardAA.sub('a')
+  const cardA   = card.multiplex('a')
+  const cardAA  = cardA.multiplex('a')
+  const cardAAA = cardAA.multiplex('a')
 
   await card.set(KEY, VAL)
   await cardA.set(KEY, VAL)
@@ -134,42 +134,42 @@ test('sub deeper than two layers', async t => {
   await card.destroy()
 })
 
-test('sub destroy()', async t => {
+test('multiplex destroy()', async t => {
   const card = new MemoryCard()
-  const cardA = card.sub('test')
+  const cardA = card.multiplex('test')
 
   try {
     await cardA.destroy()
     t.fail('should throw')
   } catch (e) {
-    t.pass('should not allow destroy() on sub memory')
+    t.pass('should not allow destroy() on multiplexed memory')
   }
 })
 
-test('sub clear()', async t => {
+test('multiplex clear()', async t => {
   const KEY = 'a'
   const VAL = 'b'
 
   const card = new MemoryCard()
-  const cardA = card.sub('test')
+  const cardA = card.multiplex('test')
 
   await card.set(KEY, VAL)
   await cardA.set(KEY, VAL)
 
   await cardA.clear()
 
-  t.equal(await card.size, 1, 'should keep parent data when clear child(sub)')
+  t.equal(await card.size, 1, 'should keep parent data when clear child(multiplex)')
   t.equal(await cardA.size, 0, 'should clear the memory')
 })
 
-test('sub has()', async t => {
+test('multiplex has()', async t => {
   const KEY = 'a'
   const VAL = 'b'
   const KEYA = 'aa'
   const VALA = 'bb'
 
   const card = new MemoryCard()
-  const cardA = card.sub('test')
+  const cardA = card.multiplex('test')
 
   await card.set(KEY, VAL)
   await cardA.set(KEYA, VALA)
@@ -183,14 +183,14 @@ test('sub has()', async t => {
   await card.destroy()
 })
 
-test('sub keys()', async t => {
+test('multiplex keys()', async t => {
   const KEY = 'a'
   const VAL = 'b'
   const KEYA = 'aa'
   const VALA = 'bb'
 
   const card = new MemoryCardTest()
-  const cardA = card.sub('test')
+  const cardA = card.multiplex('test')
 
   await card.set(KEY, VAL)
   await cardA.set(KEYA, VALA)
@@ -209,14 +209,14 @@ test('sub keys()', async t => {
   t.deepEqual(cardAKeys, [KEYA], 'should get keys back for cardA')
 })
 
-test('sub values()', async t => {
+test('multiplex values()', async t => {
   const KEY = 'key'
   const VAL = 'val'
   const KEYA = 'key-a'
   const VALA = 'val-a'
 
   const card = new MemoryCard()
-  const cardA = card.sub('test')
+  const cardA = card.multiplex('test')
 
   await card.set(KEY, VAL)
   await cardA.set(KEYA, VALA)
@@ -235,14 +235,14 @@ test('sub values()', async t => {
   t.deepEqual(cardAValues, [VALA], 'should get values back for cardA')
 })
 
-test('sub entries()', async t => {
+test('multiplex entries()', async t => {
   const KEY = 'key'
   const VAL = 'val'
   const KEYA = 'key-a'
   const VALA = 'val-a'
 
   const card = new MemoryCardTest()
-  const cardA = card.sub('test')
+  const cardA = card.multiplex('test')
 
   await card.set(KEY, VAL)
   await cardA.set(KEYA, VALA)
@@ -268,14 +268,14 @@ test('sub entries()', async t => {
   t.deepEqual(cardAValues, [VALA], 'should get values back for cardA')
 })
 
-test('sub [Symbol.asyncIterator]()', async t => {
+test('multiplex [Symbol.asyncIterator]()', async t => {
   const KEY = 'a'
   const VAL = 'b'
   const KEYA = 'aa'
   const VALA = 'bb'
 
   const card = new MemoryCardTest()
-  const cardA = card.sub('test')
+  const cardA = card.multiplex('test')
 
   await card.set(KEY, VAL)
   await cardA.set(KEYA, VALA)
@@ -300,94 +300,98 @@ test('sub [Symbol.asyncIterator]()', async t => {
   t.deepEqual(cardAValues, [VALA], 'should get values back for cardA')
 })
 
-test('sub toString()', async t => {
+test('multiplex toString()', async t => {
   const NAME = 'name'
-  const SUB_NAME = 'sub'
+  const MULTIPLEX_NAME = 'sub'
 
   const cardNoName = new MemoryCard()
-  const cardNoNameA = cardNoName.sub(SUB_NAME)
+  const cardNoNameA = cardNoName.multiplex(MULTIPLEX_NAME)
 
   const card = new MemoryCard(NAME)
-  const cardA = card.sub(SUB_NAME)
+  const cardA = card.multiplex(MULTIPLEX_NAME)
 
   t.equal(cardNoName.toString(), 'MemoryCard<>', 'should get toString with empty name')
-  t.equal(cardNoNameA.toString(), `MemoryCard<>.sub(${SUB_NAME})`, 'should get toString with empty name . sub(xxx)')
+  t.equal(cardNoNameA.toString(), `MemoryCard<>.multiplex(${MULTIPLEX_NAME})`,
+                                  'should get toString with empty name . multiplex(xxx)',
+          )
 
   t.equal(card.toString(), `MemoryCard<${NAME}>`, 'should get toString with name')
-  t.equal(cardA.toString(), `MemoryCard<${NAME}>.sub(${SUB_NAME})`, 'should get toString with name & sub name')
+  t.equal(cardA.toString(), `MemoryCard<${NAME}>.multiplex(${MULTIPLEX_NAME})`,
+                            'should get toString with name & sub name',
+          )
 })
 
-test('sub subKey()', async t => {
+test('multiplex multiplexKey()', async t => {
   const SUB_NAME = 'sub-name'
   const SUB_KEY  = 'sub-key'
 
   const EXPECTED_ABS_KEY = [
-    NAMESPACE_SUB_SEPRATOR,
+    NAMESPACE_MULTIPLEX_SEPRATOR,
     SUB_NAME,
     NAMESPACE_KEY_SEPRATOR,
     SUB_KEY,
   ].join('')
 
   const card = new MemoryCardTest()
-  const cardA = card.sub(SUB_NAME)
+  const cardA = card.multiplex(SUB_NAME)
 
   t.equal(card.resolveKey(SUB_KEY), SUB_KEY, 'root memory should get the same subKey for their arg')
   t.equal(cardA.resolveKey(SUB_KEY), EXPECTED_ABS_KEY, 'should get subKey for NAME')
 })
 
-test('sub isSub()', async t => {
+test('multiplex isMultiplex()', async t => {
   const NAME = 'a'
 
   const card = new MemoryCardTest()
-  const cardA = card.sub(NAME)
+  const cardA = card.multiplex(NAME)
 
-  t.equal(card.isSub(), false, 'card is not a sub memory')
-  t.equal(cardA.isSub(), true, 'card a is a sub memory')
+  t.equal(card.isMultiplex(), false, 'card is not a sub memory')
+  t.equal(cardA.isMultiplex(), true, 'card a is a sub memory')
 })
 
-test('sub isSubKey()', async t => {
+test('multiplex isMultiplexKey()', async t => {
   const NAME = 'name'
   const SUB_KEY = [
-    NAMESPACE_SUB_SEPRATOR,
+    NAMESPACE_MULTIPLEX_SEPRATOR,
     'name',
     NAMESPACE_KEY_SEPRATOR,
     'key',
   ].join('')
 
   const card = new MemoryCardTest()
-  const cardA = card.sub(NAME)
+  const cardA = card.multiplex(NAME)
 
-  t.equal(card.isSubKey(NAME), false, 'card should identify any key as not sub key')
-  t.equal(cardA.isSubKey(SUB_KEY), true, 'card a should identify SUB_KEY a sub key')
+  t.equal(card.isMultiplexKey(NAME), false, 'card should identify any key as not sub key')
+  t.equal(cardA.isMultiplexKey(SUB_KEY), true, 'card a should identify SUB_KEY a sub key')
 })
 
-test('sub save()', async t => {
+test('multiplex save()', async t => {
   const MEMORY_NAME = 'unit-test-memory-name'
   const SUB_NAME    = 'unit-test-sub-name'
 
   const card  = new MemoryCardTest(MEMORY_NAME)
-  const cardA = card.sub(SUB_NAME)
+  const cardA = card.multiplex(SUB_NAME)
 
   const sandbox = sinon.createSandbox()
 
   const stub = sandbox.stub(card, 'save').callsFake(() => { /* void */ })
 
   await cardA.save()
-  t.equal(stub.callCount, 1, 'sub memory should call parent save()')
+  t.equal(stub.callCount, 1, 'multiplexed memory should call parent save()')
 
   await card.destroy()
   sandbox.restore()
 })
 
-test('sub subPath()', async t => {
+test('multiplex multiplexPath()', async t => {
   const SUB_NAME_A    = 'unit-test-sub-name-a'
   const SUB_NAME_B    = 'unit-test-sub-name-b'
 
   const EXPECTED_SUB_PATH = [SUB_NAME_A, SUB_NAME_B].join('/')
 
   const card = new MemoryCardTest()
-  const cardA = card.sub(SUB_NAME_A)
-  const cardB = cardA.sub(SUB_NAME_B)
+  const cardA = card.multiplex(SUB_NAME_A)
+  const cardB = cardA.multiplex(SUB_NAME_B)
 
-  t.equal(cardB.subPath(), EXPECTED_SUB_PATH, 'should get sub path right')
+  t.equal(cardB.multiplexPath(), EXPECTED_SUB_PATH, 'should get sub path right')
 })

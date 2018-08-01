@@ -49,7 +49,7 @@ export class MemoryCard implements AsyncMap { ... }
 
 ### v0.4 master (July 2018)
 
-1. Add `sub()` method to Multiplex MemoryStore to sub-MemoryStores.
+1. Add `multiplex()` method to Multiplex MemoryStore to sub-MemoryStores.
 
 ### v0.2 (June 2018)
 

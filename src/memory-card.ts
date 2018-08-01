@@ -14,38 +14,38 @@ import {
   VERSION,
 }             from './config'
 
-export const NAMESPACE_SUB_SEPRATOR = '\r'
+export const NAMESPACE_MULTIPLEX_SEPRATOR = '\r'
 export const NAMESPACE_KEY_SEPRATOR = '\n'
 
-const NAMESPACE_SUB_SEPRATOR_REGEX = new RegExp(NAMESPACE_SUB_SEPRATOR)
+const NAMESPACE_MULTIPLEX_SEPRATOR_REGEX = new RegExp(NAMESPACE_MULTIPLEX_SEPRATOR)
 const NAMESPACE_KEY_SEPRATOR_REGEX = new RegExp(NAMESPACE_KEY_SEPRATOR)
 
 export class MemoryCard implements AsyncMap {
 
   protected parent?     : MemoryCard
   protected payload     : { [idx: string]: any }
-  protected subNameList : string[]
+  protected multiplexNameList : string[]
 
   protected file?   : string
 
-  protected static sub<T extends typeof MemoryCard> (
+  protected static multiplex<T extends typeof MemoryCard> (
     this: T,
     memory : MemoryCard,
     name   : string,
   ): T['prototype'] {
-    log.verbose('MemoryCard', 'static sub(%s, %s)', memory, name)
+    log.verbose('MemoryCard', 'static multiplex(%s, %s)', memory, name)
 
-    const subMemory = new this(memory.name)
+    const mpMemory = new this(memory.name)
 
-    subMemory.parent  = memory
-    subMemory.payload = memory.payload
+    mpMemory.parent  = memory
+    mpMemory.payload = memory.payload
 
-    subMemory.subNameList = [
-      ...memory.subNameList,
+    mpMemory.multiplexNameList = [
+      ...memory.multiplexNameList,
       name,
     ]
 
-    return subMemory
+    return mpMemory
   }
 
   constructor (
@@ -54,7 +54,7 @@ export class MemoryCard implements AsyncMap {
     log.verbose('MemoryCard', 'constructor(%s)', name || '')
 
     this.payload     = {}
-    this.subNameList = []
+    this.multiplexNameList = []
 
     if (name) {
       this.file = nodePath.isAbsolute(name)
@@ -70,13 +70,13 @@ export class MemoryCard implements AsyncMap {
   }
 
   public toString () {
-    let subString = ''
-    if (this.subNameList.length > 0) {
-      subString = this.subNameList
-                        .map(subName => `.sub(${subName})`)
+    let mpString = ''
+    if (this.multiplexNameList.length > 0) {
+      mpString = this.multiplexNameList
+                        .map(mpName => `.multiplex(${mpName})`)
                         .join('')
     }
-    return `MemoryCard<${this.name || ''}>${subString}`
+    return `MemoryCard<${this.name || ''}>${mpString}`
   }
 
   public version (): string {
@@ -86,7 +86,7 @@ export class MemoryCard implements AsyncMap {
   public async load (): Promise<void> {
     log.verbose('MemoryCard', 'load() file: %s', this.file)
 
-    if (this.isSub()) {
+    if (this.isMultiplex()) {
       return
     }
 
@@ -119,13 +119,13 @@ export class MemoryCard implements AsyncMap {
 
   public async save (): Promise<void> {
     log.verbose('MemoryCard', '<%s> save() file: %s',
-                              this.subPath(),
+                              this.multiplexPath(),
                               this.file,
                 )
 
-    if (this.isSub()) {
+    if (this.isMultiplex()) {
       if (!this.parent) {
-        throw new Error('sub memory no parent')
+        throw new Error('multiplex memory no parent')
       }
       return this.parent.save()
     }
@@ -150,33 +150,34 @@ export class MemoryCard implements AsyncMap {
   }
 
   /**
-   * Sub() related functions START
+   *
+   * Multiplexing related functions START
+   *
    */
-
-  protected isSubKey (key: string): boolean {
-    if (   NAMESPACE_SUB_SEPRATOR_REGEX.test(key)
+  protected isMultiplexKey (key: string): boolean {
+    if (   NAMESPACE_MULTIPLEX_SEPRATOR_REGEX.test(key)
         && NAMESPACE_KEY_SEPRATOR_REGEX.test(key)
     ) {
-      const namespace = this.subNamespace()
+      const namespace = this.multiplexNamespace()
       return key.startsWith(namespace)
 
     }
     return false
   }
 
-  protected subNamespace (): string {
-    if (!this.isSub()) {
-      throw new Error('not a sub memory')
+  protected multiplexNamespace (): string {
+    if (!this.isMultiplex()) {
+      throw new Error('not a multiplex memory')
     }
 
-    const namespace = NAMESPACE_SUB_SEPRATOR
-                      + this.subNameList.join(NAMESPACE_SUB_SEPRATOR)
+    const namespace = NAMESPACE_MULTIPLEX_SEPRATOR
+                      + this.multiplexNameList.join(NAMESPACE_MULTIPLEX_SEPRATOR)
     return namespace
   }
 
   protected resolveKey (name: string): string {
-    if (this.isSub()) {
-      const namespace = this.subNamespace()
+    if (this.isMultiplex()) {
+      const namespace = this.multiplexNamespace()
       return [
         namespace,
         name,
@@ -186,32 +187,41 @@ export class MemoryCard implements AsyncMap {
     }
   }
 
-  public isSub (): boolean {
-    return this.subNameList.length > 0
+  public isMultiplex (): boolean {
+    return this.multiplexNameList.length > 0
   }
 
-  protected subPath (): string {
-    return this.subNameList.join('/')
+  protected multiplexPath (): string {
+    return this.multiplexNameList.join('/')
   }
 
+  /**
+   * @deprecated use multiplex() instead
+   * @hidden
+   */
   public sub (name: string): this {
-    log.verbose('MemoryCard', 'sub(%s)', name)
+    log.warn('MemoryCard', 'sub() DEPRECATED, use multiplex() instead')
+    return this.multiplex(name)
+  }
+
+  public multiplex (name: string): this {
+    log.verbose('MemoryCard', 'multiplex(%s)', name)
 
     // FIXME: as any ?
-    return (this.constructor as any).sub(this, name)
+    return (this.constructor as any).multiplex(this, name)
   }
 
   /**
    *
-   * Sub() related functions END
+   * Multiplexing related functions END
    *
    */
 
   public async destroy (): Promise<void> {
     log.verbose('MemoryCard', 'destroy() file: %s', this.file)
 
-    if (this.isSub()) {
-      throw new Error('can not destroy on a sub memory')
+    if (this.isMultiplex()) {
+      throw new Error('can not destroy on a multiplexed memory')
     }
 
     await this.clear()
@@ -233,13 +243,13 @@ export class MemoryCard implements AsyncMap {
    * size
    */
   public get size (): Promise<number> {
-    log.verbose('MemoryCard', '<%s> size', this.subPath())
+    log.verbose('MemoryCard', '<%s> size', this.multiplexPath())
 
     let count
 
-    if (this.isSub()) {
+    if (this.isMultiplex()) {
       count = Object.keys(this.payload)
-                    .filter(key => this.isSubKey(key))
+                    .filter(key => this.isMultiplexKey(key))
                     .length
     } else {
       count = Object.keys(this.payload).length
@@ -248,7 +258,7 @@ export class MemoryCard implements AsyncMap {
   }
 
   public async get<T = any> (name: string): Promise<undefined | T> {
-    log.verbose('MemoryCard', '<%s> get(%s)', this.subPath(), name)
+    log.verbose('MemoryCard', '<%s> get(%s)', this.multiplexPath(), name)
 
     const key = this.resolveKey(name)
 
@@ -256,7 +266,7 @@ export class MemoryCard implements AsyncMap {
   }
 
   public async set<T = any> (name: string, data: T): Promise<void> {
-    log.verbose('MemoryCard', '<%s> set(%s, %s)', this.subPath(), name, data)
+    log.verbose('MemoryCard', '<%s> set(%s, %s)', this.multiplexPath(), name, data)
 
     const key = this.resolveKey(name)
 
@@ -264,12 +274,12 @@ export class MemoryCard implements AsyncMap {
   }
 
   public async* [Symbol.asyncIterator]<T = any> (): AsyncIterableIterator<[string, T]> {
-    log.verbose('MemoryCard', '<%s> *[Symbol.asyncIterator]()', this.subPath())
+    log.verbose('MemoryCard', '<%s> *[Symbol.asyncIterator]()', this.multiplexPath())
     yield* this.entries()
   }
 
   public async* entries<T = any> (): AsyncIterableIterator<[string, T]> {
-    log.verbose('MemoryCard', '<%s> *entries()', this.subPath())
+    log.verbose('MemoryCard', '<%s> *entries()', this.multiplexPath())
 
     for await (const relativeKey of this.keys()) {
       const absoluteKey       = this.resolveKey(relativeKey)
@@ -281,11 +291,11 @@ export class MemoryCard implements AsyncMap {
   }
 
   public async clear (): Promise<void> {
-    log.verbose('MemoryCard', '<%s> clear()', this.subPath())
+    log.verbose('MemoryCard', '<%s> clear()', this.multiplexPath())
 
-    if (this.isSub()) {
+    if (this.isMultiplex()) {
       for (const key in this.payload) {
-        if (this.isSubKey(key)) {
+        if (this.isMultiplexKey(key)) {
           delete this.payload[key]
         }
       }
@@ -295,29 +305,29 @@ export class MemoryCard implements AsyncMap {
   }
 
   public async delete (name: string): Promise<void> {
-    log.verbose('MemoryCard', '<%s> delete(%s)', this.subPath(), name)
+    log.verbose('MemoryCard', '<%s> delete(%s)', this.multiplexPath(), name)
 
     const key = this.resolveKey(name)
     delete this.payload[key]
   }
 
   public async has (key: string): Promise<boolean> {
-    log.verbose('MemoryCard', '<%s> has(%s)', this.subPath(), key)
+    log.verbose('MemoryCard', '<%s> has(%s)', this.multiplexPath(), key)
 
     const absoluteKey = this.resolveKey(key)
     return absoluteKey in this.payload
   }
 
   public async *keys (): AsyncIterableIterator<string> {
-    log.verbose('MemoryCard', '<%s> keys()', this.subPath())
+    log.verbose('MemoryCard', '<%s> keys()', this.multiplexPath())
     for (const key of Object.keys(this.payload)) {
       // console.log('key', key)
-      if (this.isSub()) {
-        if (this.isSubKey(key)) {
-          const namespace = this.subNamespace()
+      if (this.isMultiplex()) {
+        if (this.isMultiplexKey(key)) {
+          const namespace = this.multiplexNamespace()
           // `+1` means there's another NAMESPACE_KEY_SEPRATOR we need to trim
-          const subKey = key.substr(namespace.length + 1)
-          yield subKey
+          const mpKey = key.substr(namespace.length + 1)
+          yield mpKey
         }
         continue
       }
@@ -326,7 +336,7 @@ export class MemoryCard implements AsyncMap {
   }
 
   public async *values<T = any> (): AsyncIterableIterator<T> {
-    log.verbose('MemoryCard', '<%s> values()', this.subPath())
+    log.verbose('MemoryCard', '<%s> values()', this.multiplexPath())
     for await (const relativeKey of this.keys()) {
       const absoluteKey = this.resolveKey(relativeKey)
       yield this.payload[absoluteKey]
