@@ -10,23 +10,31 @@ import {
 
 import {
   StorageBackend,
-}                   from './backend'
+}                         from './backend'
+import {
+  StorageBackendOptions,
+  StorageFileOptions,
+}                         from './backend-config'
 
-export interface FileOptions {
-  name: string,
-}
-
-export class StorageFile implements StorageBackend {
+export class StorageFile extends StorageBackend {
   private readonly absFileName: string
 
   constructor (
-    private options: FileOptions,
+    name    : string,
+    options : StorageBackendOptions,
   ) {
-    this.absFileName = path.isAbsolute(options.name)
-                        ? options.name
+    log.verbose('StorageFile', 'constructor(%s, ...)', name)
+
+    options.type = 'file'
+    super(name, options)
+
+    options = options as StorageFileOptions
+
+    this.absFileName = path.isAbsolute(this.name)
+                        ? this.name
                         : path.resolve(
                             process.cwd(),
-                            options.name,
+                            this.name,
                           )
     if (!/\.memory-card\.json$/.test(this.absFileName)) {
       this.absFileName +=  '.memory-card.json'
@@ -84,6 +92,8 @@ export class StorageFile implements StorageBackend {
   }
 
   public async destroy (): Promise<void> {
+    log.verbose('StorageFile', 'destroy()')
+
     if (fs.existsSync(this.absFileName)) {
       fs.unlinkSync(this.absFileName)
     }

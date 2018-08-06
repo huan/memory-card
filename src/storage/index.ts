@@ -1,4 +1,9 @@
-export { StorageBackend } from './backend'
-
-export { StorageFile }    from './file'
-export { StorageS3 }      from './s3'
+export {
+  StorageBackendOptions,
+}                         from './backend-config'
+export {
+  StorageBackend,
+}                         from './backend'
+export {
+  getStorage,
+}                         from './get-storage'
