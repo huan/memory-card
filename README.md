@@ -38,7 +38,7 @@ export class MemoryCard implements AsyncMap { ... }
 
 ### 3. destroy()
 
-### 4. sub()
+### 4. multiplex()
 
 ## TODO
 
@@ -47,11 +47,15 @@ export class MemoryCard implements AsyncMap { ... }
 
 ## CHANGELOG
 
-### v0.4 master (July 2018)
+### v0.6 master (Aug 2018)
+
+1. Support AWS S3 Cloud Storage
+
+### v0.4 July 2018
 
 1. Add `multiplex()` method to Multiplex MemoryStore to sub-MemoryStores.
 
-### v0.2 (June 2018)
+### v0.2 June 2018
 
 1. Unit Testing
 1. NPM Pack Testing
