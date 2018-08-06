@@ -1,7 +1,7 @@
 export {
   AsyncMap,
 }               from './async-map.type'
-import {
+export {
   log,
 }               from './config'
 import {
@@ -9,7 +9,6 @@ import {
 }               from './memory-card'
 
 export {
-  log,
   MemoryCard,
 }
 export default MemoryCard

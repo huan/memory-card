@@ -3,30 +3,59 @@
 //   (<any>Symbol).asyncIterator =  Symbol.for('Symbol.asyncIterator')
 // }
 
-import * as fs        from 'fs'
-import * as nodePath  from 'path'
-
-import {
-  AsyncMap,
-}             from './async-map.type'
 import {
   log,
   VERSION,
-}             from './config'
+}                       from './config'
+import {
+  StorageBackend,
+  StorageBackendName,
+}                       from './storage/backend'
+import {
+  AsyncMap,
+  MemoryCardPayload,
+}                       from './types'
 
 export const NAMESPACE_MULTIPLEX_SEPRATOR = '\r'
-export const NAMESPACE_KEY_SEPRATOR = '\n'
+export const NAMESPACE_KEY_SEPRATOR       = '\n'
 
 const NAMESPACE_MULTIPLEX_SEPRATOR_REGEX = new RegExp(NAMESPACE_MULTIPLEX_SEPRATOR)
-const NAMESPACE_KEY_SEPRATOR_REGEX = new RegExp(NAMESPACE_KEY_SEPRATOR)
+const NAMESPACE_KEY_SEPRATOR_REGEX       = new RegExp(NAMESPACE_KEY_SEPRATOR)
+
+export interface MemoryCardOptions {
+  name    : string,
+  backend : StorageBackendName,
+  backendOptions:
+}
+
+export interface MemoryCardJsonObject {
+  payload: MemoryCardPayload,
+  options: MemoryCardOptions,
+}
 
 export class MemoryCard implements AsyncMap {
 
-  protected parent?     : MemoryCard
-  protected payload     : { [idx: string]: any }
-  protected multiplexNameList : string[]
+  /**
+   *
+   * Static
+   *
+   */
+  public fromJSON (textOrObj: string | MemoryCardJsonObject): MemoryCard {
+    log.verbose('MemoryCard', 'fromJSON(...)')
 
-  protected file?   : string
+    let jsonObj: MemoryCardJsonObject
+
+    if (typeof textOrObj === 'string') {
+      jsonObj = JSON.parse(textOrObj)
+    } else {
+      jsonObj = textOrObj
+    }
+
+    const card = new MemoryCard()
+    card.name = jsonObj.name
+    card.payload = jsonObj.payload
+    return {} as any
+  }
 
   protected static multiplex<T extends typeof MemoryCard> (
     this: T,
@@ -48,25 +77,26 @@ export class MemoryCard implements AsyncMap {
     return mpMemory
   }
 
+  /**
+   *
+   * Instance
+   *
+   */
+  protected parent?     : MemoryCard
+  protected payload     : MemoryCardPayload
+  protected multiplexNameList : string[]
+
+  protected storage? : StorageBackend
+
   constructor (
     public name: null | string = null,
   ) {
     log.verbose('MemoryCard', 'constructor(%s)', name || '')
 
-    this.payload     = {}
+    this.payload           = {}
     this.multiplexNameList = []
 
-    if (name) {
-      this.file = nodePath.isAbsolute(name)
-        ? name
-        : nodePath.resolve(
-            process.cwd(),
-            name,
-          )
-      if (!/\.memory-card\.json$/.test(this.file)) {
-        this.file +=  '.memory-card.json'
-      }
-    }
+    this.storage = this.initStorage()
   }
 
   public toString () {
@@ -83,44 +113,29 @@ export class MemoryCard implements AsyncMap {
     return VERSION
   }
 
+  private initStorage (): StorageBackend {
+    return {} as any
+  }
+
   public async load (): Promise<void> {
-    log.verbose('MemoryCard', 'load() file: %s', this.file)
+    log.verbose('MemoryCard', 'load() from storage: %s', this.storage || 'N/A')
 
     if (this.isMultiplex()) {
       return
     }
 
-    const file = this.file
-    if (!file) {
-      log.verbose('MemoryCard', 'load() no file, NOOP')
+    if (!this.storage) {
+      log.verbose('MemoryCard', 'load() no storage, NOOP')
       return
     }
 
-    if (!fs.existsSync(file)) {
-      log.verbose('MemoryCard', 'load() file not exist, NOOP')
-      return
-    }
-
-    const buffer = await new Promise<Buffer>((resolve, reject) => fs.readFile(file, (err, buf) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(buf)
-      }
-    }))
-    const text = buffer.toString()
-
-    try {
-      this.payload = JSON.parse(text)
-    } catch (e) {
-      log.error('MemoryCard', 'load() exception: %s', e)
-    }
+    this.payload = await this.storage.load()
   }
 
   public async save (): Promise<void> {
-    log.verbose('MemoryCard', '<%s> save() file: %s',
+    log.verbose('MemoryCard', '<%s> save() to %s',
                               this.multiplexPath(),
-                              this.file,
+                              this.storage,
                 )
 
     if (this.isMultiplex()) {
@@ -130,23 +145,17 @@ export class MemoryCard implements AsyncMap {
       return this.parent.save()
     }
 
-    const file = this.file
-    if (!file) {
-      log.verbose('MemoryCard', 'save() no file, NOOP')
+    if (!this.storage) {
+      log.verbose('MemoryCard', 'save() no storage, NOOP')
       return
     }
+
     if (!this.payload) {
       log.verbose('MemoryCard', 'save() no payload, NOOP')
       return
     }
 
-    try {
-      const text = JSON.stringify(this.payload)
-      await new Promise<void>((resolve, reject) => fs.writeFile(file, text, err => err ? reject(err) : resolve()))
-    } catch (e) {
-      log.error('MemoryCard', 'save() exception: %s', e)
-      throw e
-    }
+    await this.storage.save(this.payload)
   }
 
   /**
@@ -218,16 +227,17 @@ export class MemoryCard implements AsyncMap {
    */
 
   public async destroy (): Promise<void> {
-    log.verbose('MemoryCard', 'destroy() file: %s', this.file)
+    log.verbose('MemoryCard', 'destroy() storage: %s', this.storage || 'N/A')
 
     if (this.isMultiplex()) {
       throw new Error('can not destroy on a multiplexed memory')
     }
 
     await this.clear()
-    if (this.file && fs.existsSync(this.file)) {
-      fs.unlinkSync(this.file)
-      this.file = undefined
+
+    if (this.storage) {
+      await this.storage.destroy()
+      this.storage = undefined
     }
   }
 
@@ -262,7 +272,7 @@ export class MemoryCard implements AsyncMap {
 
     const key = this.resolveKey(name)
 
-    return this.payload[key]
+    return this.payload[key] as any
   }
 
   public async set<T = any> (name: string, data: T): Promise<void> {
@@ -270,7 +280,7 @@ export class MemoryCard implements AsyncMap {
 
     const key = this.resolveKey(name)
 
-    this.payload[key] = data
+    this.payload[key] = data as any
   }
 
   public async* [Symbol.asyncIterator]<T = any> (): AsyncIterableIterator<[string, T]> {
@@ -283,7 +293,7 @@ export class MemoryCard implements AsyncMap {
 
     for await (const relativeKey of this.keys()) {
       const absoluteKey       = this.resolveKey(relativeKey)
-      const data: T           = this.payload[absoluteKey]
+      const data: T           = this.payload[absoluteKey] as any
 
       const pair: [string, T] = [relativeKey, data]
       yield pair
@@ -339,7 +349,7 @@ export class MemoryCard implements AsyncMap {
     log.verbose('MemoryCard', '<%s> values()', this.multiplexPath())
     for await (const relativeKey of this.keys()) {
       const absoluteKey = this.resolveKey(relativeKey)
-      yield this.payload[absoluteKey]
+      yield this.payload[absoluteKey] as any
     }
   }
 
