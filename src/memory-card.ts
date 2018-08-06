@@ -8,9 +8,10 @@ import {
   VERSION,
 }                       from './config'
 import {
+  getStorage,
   StorageBackend,
-  StorageBackendName,
-}                       from './storage/backend'
+  StorageBackendOptions,
+}                         from './storage'
 import {
   AsyncMap,
   MemoryCardPayload,
@@ -23,9 +24,13 @@ const NAMESPACE_MULTIPLEX_SEPRATOR_REGEX = new RegExp(NAMESPACE_MULTIPLEX_SEPRAT
 const NAMESPACE_KEY_SEPRATOR_REGEX       = new RegExp(NAMESPACE_KEY_SEPRATOR)
 
 export interface MemoryCardOptions {
-  name    : string,
-  backend : StorageBackendName,
-  backendOptions:
+  name            : string,
+  storageOptions? : StorageBackendOptions,
+  ////////////
+  multiplex?: {
+    parent : MemoryCard,
+    name   : string,
+  }
 }
 
 export interface MemoryCardJsonObject {
@@ -34,12 +39,15 @@ export interface MemoryCardJsonObject {
 }
 
 export class MemoryCard implements AsyncMap {
-
   /**
+   *
    *
    * Static
    *
+   *
    */
+  public static VERSION = VERSION
+
   public fromJSON (textOrObj: string | MemoryCardJsonObject): MemoryCard {
     log.verbose('MemoryCard', 'fromJSON(...)')
 
@@ -51,10 +59,10 @@ export class MemoryCard implements AsyncMap {
       jsonObj = textOrObj
     }
 
-    const card = new MemoryCard()
-    card.name = jsonObj.name
+    const card = new MemoryCard(jsonObj.options)
     card.payload = jsonObj.payload
-    return {} as any
+
+    return card
   }
 
   protected static multiplex<T extends typeof MemoryCard> (
@@ -64,22 +72,25 @@ export class MemoryCard implements AsyncMap {
   ): T['prototype'] {
     log.verbose('MemoryCard', 'static multiplex(%s, %s)', memory, name)
 
-    const mpMemory = new this(memory.name)
+    if (!memory.options) {
+      throw new Error('can not multiplex a un-named MemoryCard')
+    }
 
-    mpMemory.parent  = memory
-    mpMemory.payload = memory.payload
-
-    mpMemory.multiplexNameList = [
-      ...memory.multiplexNameList,
-      name,
-    ]
-
+    const mpMemory = new this({
+      ...memory.options,
+      multiplex: {
+        name,
+        parent: memory,
+      },
+    })
     return mpMemory
   }
 
   /**
    *
+   *
    * Instance
+   *
    *
    */
   protected parent?     : MemoryCard
@@ -89,14 +100,26 @@ export class MemoryCard implements AsyncMap {
   protected storage? : StorageBackend
 
   constructor (
-    public name: null | string = null,
+    public options?: MemoryCardOptions,
   ) {
-    log.verbose('MemoryCard', 'constructor(%s)', name || '')
+    log.verbose('MemoryCard', 'constructor(%s)',
+                              JSON.stringify(options),
+                )
 
-    this.payload           = {}
-    this.multiplexNameList = []
+    if (options && options.multiplex) {
+      this.parent   = options.multiplex.parent
+      this.payload  = this.parent.payload
+      this.multiplexNameList = [
+        ...this.parent.multiplexNameList,
+        options.multiplex.name,
+      ]
+      this.storage = undefined
+    } else {
+      this.payload           = {}
+      this.multiplexNameList = []
+      this.storage           = this.getStorage()
+    }
 
-    this.storage = this.initStorage()
   }
 
   public toString () {
@@ -106,21 +129,30 @@ export class MemoryCard implements AsyncMap {
                         .map(mpName => `.multiplex(${mpName})`)
                         .join('')
     }
-    return `MemoryCard<${this.name || ''}>${mpString}`
+    return `MemoryCard<${this.options && this.options.name || ''}>${mpString}`
   }
 
   public version (): string {
     return VERSION
   }
 
-  private initStorage (): StorageBackend {
-    return {} as any
+  private getStorage (): undefined | StorageBackend {
+    if (!this.options) {
+      return
+    }
+
+    const storage = getStorage(
+      this.options.name,
+      this.options.storageOptions,
+    )
+    return storage
   }
 
   public async load (): Promise<void> {
     log.verbose('MemoryCard', 'load() from storage: %s', this.storage || 'N/A')
 
     if (this.isMultiplex()) {
+      log.warn('MemoryCard', 'load() should not be called on a multiplex MemoryCard. NOOP')
       return
     }
 

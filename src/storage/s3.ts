@@ -1,61 +1,87 @@
 import S3 from 'aws-sdk/clients/s3'
 
 import {
+  log,
+}                     from '../config'
+import {
   MemoryCardPayload,
 }                     from '../types'
+
 import {
   StorageBackend,
-}                     from './backend'
+}                         from './backend'
+import {
+  StorageBackendOptions,
+  StorageS3Options,
+}                         from './backend-config'
 
-export interface S3Options {
-  accessKeyId     : string,
-  secretAccessKey : string,
-  region          : string,
-  ////////////////////////
-  bucket : string,
-  key    : string,
-}
-
-export class StorageS3 implements StorageBackend {
+export class StorageS3 extends StorageBackend {
   private s3: S3
 
   constructor (
-    private options: S3Options
+    name    : string,
+    options : StorageBackendOptions,
   ) {
+    log.verbose('StorageS3', 'constructor()')
+
+    options.type = 's3'
+    super(name, options)
+    options = options as StorageS3Options
+
     this.s3 = new S3({
       credentials: {
         accessKeyId     : options.accessKeyId,
         secretAccessKey : options.secretAccessKey,
-      }
+      },
+      region: options.region,
     })
   }
 
   public async save (payload: MemoryCardPayload): Promise<void> {
+    log.verbose('StorageS3', 'save()')
+
+    const options = this.options as StorageS3Options
+
     await this.s3.putObject({
       Body   : JSON.stringify(payload),
-      Bucket : this.options.bucket,
-      Key    : this.options.key,
+      Bucket : options.bucket,
+      Key    : this.name,
     }).promise()
     return
   }
 
   public async load (): Promise<MemoryCardPayload> {
-    const result = await this.s3.getObject({
-      Bucket : this.options.bucket,
-      Key    : this.options.key,
-    }).promise()
+    log.verbose('StorageS3', 'load()')
 
-    if (!result || !result.Body) {
+    const options = this.options as StorageS3Options
+
+    try {
+      const result = await this.s3.getObject({
+        Bucket : options.bucket,
+        Key    : this.name,
+      }).promise()
+
+      if (!result || !result.Body) {
+        return {}
+      }
+
+      return JSON.parse(result.Body.toString())
+
+    } catch (e) {
       return {}
     }
-    return JSON.parse(result.Body.toString())
+
   }
 
   public async destroy (): Promise<void> {
+    log.verbose('StorageS3', 'destroy()')
+
+    const options = this.options as StorageS3Options
+
     await this.s3.deleteObject({
-      Bucket : this.options.bucket,
-      Key    : this.options.key,
-    })
+      Bucket : options.bucket,
+      Key    : this.name,
+    }).promise()
     return
   }
 }
