@@ -100,11 +100,15 @@ export class MemoryCard implements AsyncMap {
   protected storage? : StorageBackend
 
   constructor (
-    public options?: MemoryCardOptions,
+    public options?: string | MemoryCardOptions,
   ) {
     log.verbose('MemoryCard', 'constructor(%s)',
                               JSON.stringify(options),
                 )
+
+    if (typeof options === 'string') {
+      options = { name: options }
+    }
 
     if (options && options.multiplex) {
       this.parent   = options.multiplex.parent
