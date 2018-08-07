@@ -99,8 +99,10 @@ export class MemoryCard implements AsyncMap {
 
   protected storage? : StorageBackend
 
+  public options?: MemoryCardOptions
+
   constructor (
-    public options?: string | MemoryCardOptions,
+    options?: string | MemoryCardOptions,
   ) {
     log.verbose('MemoryCard', 'constructor(%s)',
                               JSON.stringify(options),
@@ -124,6 +126,7 @@ export class MemoryCard implements AsyncMap {
       this.storage           = this.getStorage()
     }
 
+    this.options = options
   }
 
   public toString () {
