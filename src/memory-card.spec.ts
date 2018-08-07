@@ -28,7 +28,7 @@ test('smoke testing', async t => {
   t.equal(await card.size, 0, 'clear reset to 0')
 })
 
-test('storage file load/save', async t => {
+test.only('storage file load/save', async t => {
   const EXPECTED_KEY = 'key'
   const EXPECTED_VAL = 'val'
 

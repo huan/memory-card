@@ -114,6 +114,9 @@ export class MemoryCard implements AsyncMap {
       options = { name: options }
     }
 
+    this.options = options
+    this.name    = options && options.name
+
     if (options && options.multiplex) {
       this.parent   = options.multiplex.parent
       this.payload  = this.parent.payload
@@ -127,9 +130,6 @@ export class MemoryCard implements AsyncMap {
       this.multiplexNameList = []
       this.storage           = this.getStorage()
     }
-
-    this.options = options
-    this.name    = options && options.name
   }
 
   public toString () {
@@ -147,6 +147,13 @@ export class MemoryCard implements AsyncMap {
   }
 
   private getStorage (): undefined | StorageBackend {
+    log.verbose('MemoryCard', 'getStorage() for storage type: %s',
+                              this.options
+                                && this.options.storageOptions
+                                && this.options.storageOptions.type
+                                || 'N/A',
+                )
+
     if (!this.options) {
       return
     }
