@@ -93,13 +93,15 @@ export class MemoryCard implements AsyncMap {
    *
    *
    */
+  public name?: string
+
   protected parent?     : MemoryCard
   protected payload     : MemoryCardPayload
   protected multiplexNameList : string[]
 
   protected storage? : StorageBackend
 
-  public options?: MemoryCardOptions
+  private options?: MemoryCardOptions
 
   constructor (
     options?: string | MemoryCardOptions,
@@ -127,6 +129,7 @@ export class MemoryCard implements AsyncMap {
     }
 
     this.options = options
+    this.name    = options && options.name
   }
 
   public toString () {
