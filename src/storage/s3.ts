@@ -37,6 +37,16 @@ export class StorageS3 extends StorageBackend {
     })
   }
 
+  public toString (): string {
+    const text = [
+      this.constructor.name,
+      '<',
+      this.name,
+      '>',
+    ].join('')
+    return text
+  }
+
   public async save (payload: MemoryCardPayload): Promise<void> {
     log.verbose('StorageS3', 'save()')
 

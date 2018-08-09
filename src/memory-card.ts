@@ -182,9 +182,10 @@ export class MemoryCard implements AsyncMap {
   }
 
   public async save (): Promise<void> {
-    log.verbose('MemoryCard', '<%s> save() to %s',
+    log.verbose('MemoryCard', '<%s>%s save() to %s',
+                              this.name || '',
                               this.multiplexPath(),
-                              this.storage,
+                              this.storage || 'N/A',
                 )
 
     if (this.isMultiplex()) {
