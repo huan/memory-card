@@ -174,6 +174,10 @@ export class MemoryCard implements AsyncMap {
       return
     }
 
+    if (this.payload) {
+      throw new Error('memory had already loaded before.')
+    }
+
     if (this.storage) {
       this.payload = await this.storage.load()
     } else {

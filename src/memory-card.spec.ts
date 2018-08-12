@@ -110,3 +110,22 @@ test('save() throw exception before load()', async t => {
     t.pass('should throw to call save() before load()')
   }
 })
+
+test('load() twice should throw error', async t => {
+  const NAME = Math.random().toString().substr(2)
+
+  const card = new MemoryCard({
+    name: NAME,
+    storageOptions: {
+      type: 'file',
+    }
+  })
+
+  try {
+    await card.load()
+    await card.load()
+    t.fail('should not call load() success after twice')
+  } catch (e) {
+    t.pass('should throw to call load() twice')
+  }
+})
