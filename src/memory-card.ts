@@ -24,7 +24,7 @@ const NAMESPACE_MULTIPLEX_SEPRATOR_REGEX = new RegExp(NAMESPACE_MULTIPLEX_SEPRAT
 const NAMESPACE_KEY_SEPRATOR_REGEX       = new RegExp(NAMESPACE_KEY_SEPRATOR)
 
 export interface MemoryCardOptions {
-  name?           : string | symbol,
+  name?           : string,
   storageOptions? : StorageBackendOptions,
   ////////////
   multiplex?: {
@@ -93,7 +93,7 @@ export class MemoryCard implements AsyncMap {
    *
    *
    */
-  public name?: string | symbol
+  public name?: string
 
   protected parent?           : MemoryCard
   protected payload?          : MemoryCardPayload
@@ -103,15 +103,13 @@ export class MemoryCard implements AsyncMap {
   private options?: MemoryCardOptions
 
   constructor (
-    options?: string | symbol | MemoryCardOptions,
+    options?: string | MemoryCardOptions,
   ) {
     log.verbose('MemoryCard', 'constructor(%s)',
                               JSON.stringify(options),
                 )
 
-    if (typeof options === 'string'
-      || typeof options === 'symbol'
-    ) {
+    if (typeof options === 'string') {
       options = { name: options }
     }
 

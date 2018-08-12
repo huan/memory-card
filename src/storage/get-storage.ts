@@ -12,7 +12,7 @@ import {
 }                         from './backend'
 
 export function getStorage (
-  name?   : string | symbol,
+  name?   : string,
   options : StorageBackendOptions = {
     type: 'file',
   }
@@ -31,6 +31,6 @@ export function getStorage (
   }
 
   const Backend = BACKEND_DICT[options.type]
-  const backend = new Backend(name.toString(), options)
+  const backend = new Backend(name, options)
   return backend
 }
