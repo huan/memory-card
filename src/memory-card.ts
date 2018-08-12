@@ -24,7 +24,7 @@ const NAMESPACE_MULTIPLEX_SEPRATOR_REGEX = new RegExp(NAMESPACE_MULTIPLEX_SEPRAT
 const NAMESPACE_KEY_SEPRATOR_REGEX       = new RegExp(NAMESPACE_KEY_SEPRATOR)
 
 export interface MemoryCardOptions {
-  name?           : string,
+  name?           : string | symbol,
   storageOptions? : StorageBackendOptions,
   ////////////
   multiplex?: {
@@ -93,7 +93,7 @@ export class MemoryCard implements AsyncMap {
    *
    *
    */
-  public name?: string
+  public name?: string | symbol
 
   protected parent?           : MemoryCard
   protected payload?          : MemoryCardPayload
@@ -103,13 +103,15 @@ export class MemoryCard implements AsyncMap {
   private options?: MemoryCardOptions
 
   constructor (
-    options?: string | MemoryCardOptions,
+    options?: string | symbol | MemoryCardOptions,
   ) {
     log.verbose('MemoryCard', 'constructor(%s)',
                               JSON.stringify(options),
                 )
 
-    if (typeof options === 'string') {
+    if (typeof options === 'string'
+      || typeof options === 'symbol'
+    ) {
       options = { name: options }
     }
 
@@ -140,7 +142,12 @@ export class MemoryCard implements AsyncMap {
                         .map(mpName => `.multiplex(${mpName})`)
                         .join('')
     }
-    return `MemoryCard<${this.options && this.options.name || ''}>${mpString}`
+
+    const name = this.options && this.options.name
+      ? this.options.name.toString()
+      : ''
+
+    return `MemoryCard<${name}>${mpString}`
   }
 
   public version (): string {
@@ -157,6 +164,10 @@ export class MemoryCard implements AsyncMap {
 
     if (!this.options) {
       return
+    }
+
+    if (typeof this.options.name === 'symbol') {
+      throw new Error('must specify name as String')
     }
 
     const storage = getStorage(
