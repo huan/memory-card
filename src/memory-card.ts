@@ -24,7 +24,7 @@ const NAMESPACE_MULTIPLEX_SEPRATOR_REGEX = new RegExp(NAMESPACE_MULTIPLEX_SEPRAT
 const NAMESPACE_KEY_SEPRATOR_REGEX       = new RegExp(NAMESPACE_KEY_SEPRATOR)
 
 export interface MemoryCardOptions {
-  name            : string,
+  name?           : string,
   storageOptions? : StorageBackendOptions,
   ////////////
   multiplex?: {
@@ -72,9 +72,9 @@ export class MemoryCard implements AsyncMap {
   ): T['prototype'] {
     log.verbose('MemoryCard', 'static multiplex(%s, %s)', memory, name)
 
-    if (!memory.options) {
-      throw new Error('can not multiplex a un-named MemoryCard')
-    }
+    // if (!memory.options) {
+    //   throw new Error('can not multiplex a un-named MemoryCard')
+    // }
 
     const mpMemory = new this({
       ...memory.options,
@@ -183,6 +183,13 @@ export class MemoryCard implements AsyncMap {
   }
 
   public async save (): Promise<void> {
+    if (this.isMultiplex()) {
+      if (!this.parent) {
+        throw new Error('multiplex memory no parent')
+      }
+      return this.parent.save()
+    }
+
     log.verbose('MemoryCard', '<%s>%s save() to %s',
                               this.name || '',
                               this.multiplexPath(),
@@ -191,13 +198,6 @@ export class MemoryCard implements AsyncMap {
 
     if (!this.payload) {
       throw new Error('no payload, please call load() first.')
-    }
-
-    if (this.isMultiplex()) {
-      if (!this.parent) {
-        throw new Error('multiplex memory no parent')
-      }
-      return this.parent.save()
     }
 
     if (!this.storage) {
