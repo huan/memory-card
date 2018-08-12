@@ -166,10 +166,6 @@ export class MemoryCard implements AsyncMap {
       return
     }
 
-    if (typeof this.options.name === 'symbol') {
-      throw new Error('must specify name as String')
-    }
-
     const storage = getStorage(
       this.options.name,
       this.options.storageOptions,

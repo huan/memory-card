@@ -129,3 +129,16 @@ test('load() twice should throw error', async t => {
     t.pass('should throw to call load() twice')
   }
 })
+
+test('options should allow name with Symbol', async t => {
+  const NAME = Symbol('name')
+
+  const card = new MemoryCard({
+    name: NAME,
+    storageOptions: {
+      type: 'file',
+    }
+  })
+
+  t.equal(card.name, NAME, 'should equal to the symbol name')
+})
