@@ -130,15 +130,9 @@ test('load() twice should throw error', async t => {
   }
 })
 
-// test('options should allow name with Symbol', async t => {
-//   const NAME = Symbol('name')
+test('instanciate MemoryCard with undefined options should get undefined name', async t => {
+  const UNDEFIEND = undefined
+  const card = new MemoryCard(UNDEFIEND)
 
-//   const card = new MemoryCard({
-//     name: NAME,
-//     storageOptions: {
-//       type: 'file',
-//     }
-//   })
-
-//   t.equal(card.name, NAME, 'should equal to the symbol name')
-// })
+  t.equal(card.name, UNDEFIEND, 'should get undefined as name')
+})
