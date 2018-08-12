@@ -1,6 +1,6 @@
 {
   "name": "memory-card",
-  "version": "0.5.1",
+  "version": "0.6.8",
   "description": "ES6 Map like Async API, with Swagger API Backend Support.",
   "main": "dist/src/index.js",
   "typings": "dist/src/index.d.ts",
@@ -51,9 +51,9 @@
     "shx": "^0.2.2",
     "sinon": "^6.1.0",
     "ts-node": "^7.0.0",
-    "tslint": "^5.10.0",
+    "tslint": "^5.11.0",
     "tslint-config-standard": "^7.1.0",
-    "typescript": "^2.9.2"
+    "typescript": "^3.0.1"
   },
   "git": {
     "scripts": {

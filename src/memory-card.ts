@@ -24,7 +24,7 @@ const NAMESPACE_MULTIPLEX_SEPRATOR_REGEX = new RegExp(NAMESPACE_MULTIPLEX_SEPRAT
 const NAMESPACE_KEY_SEPRATOR_REGEX       = new RegExp(NAMESPACE_KEY_SEPRATOR)
 
 export interface MemoryCardOptions {
-  name            : string,
+  name?           : string,
   storageOptions? : StorageBackendOptions,
   ////////////
   multiplex?: {
@@ -72,9 +72,9 @@ export class MemoryCard implements AsyncMap {
   ): T['prototype'] {
     log.verbose('MemoryCard', 'static multiplex(%s, %s)', memory, name)
 
-    if (!memory.options) {
-      throw new Error('can not multiplex a un-named MemoryCard')
-    }
+    // if (!memory.options) {
+    //   throw new Error('can not multiplex a un-named MemoryCard')
+    // }
 
     const mpMemory = new this({
       ...memory.options,
@@ -93,18 +93,28 @@ export class MemoryCard implements AsyncMap {
    *
    *
    */
-  protected parent?     : MemoryCard
-  protected payload     : MemoryCardPayload
+  public name?: string
+
+  protected parent?           : MemoryCard
+  protected payload?          : MemoryCardPayload
+  protected storage?          : StorageBackend
   protected multiplexNameList : string[]
 
-  protected storage? : StorageBackend
+  private options?: MemoryCardOptions
 
   constructor (
-    public options?: MemoryCardOptions,
+    options?: string | MemoryCardOptions,
   ) {
     log.verbose('MemoryCard', 'constructor(%s)',
                               JSON.stringify(options),
                 )
+
+    if (typeof options === 'string') {
+      options = { name: options }
+    }
+
+    this.options = options
+    this.name    = options && options.name
 
     if (options && options.multiplex) {
       this.parent   = options.multiplex.parent
@@ -115,11 +125,12 @@ export class MemoryCard implements AsyncMap {
       ]
       this.storage = undefined
     } else {
-      this.payload           = {}
+      // payload should be undefined before load()
+      this.payload           = undefined
+
       this.multiplexNameList = []
       this.storage           = this.getStorage()
     }
-
   }
 
   public toString () {
@@ -129,7 +140,12 @@ export class MemoryCard implements AsyncMap {
                         .map(mpName => `.multiplex(${mpName})`)
                         .join('')
     }
-    return `MemoryCard<${this.options && this.options.name || ''}>${mpString}`
+
+    const name = this.options && this.options.name
+      ? this.options.name.toString()
+      : ''
+
+    return `MemoryCard<${name}>${mpString}`
   }
 
   public version (): string {
@@ -137,6 +153,13 @@ export class MemoryCard implements AsyncMap {
   }
 
   private getStorage (): undefined | StorageBackend {
+    log.verbose('MemoryCard', 'getStorage() for storage type: %s',
+                              this.options
+                                && this.options.storageOptions
+                                && this.options.storageOptions.type
+                                || 'N/A',
+                )
+
     if (!this.options) {
       return
     }
@@ -156,20 +179,19 @@ export class MemoryCard implements AsyncMap {
       return
     }
 
-    if (!this.storage) {
-      log.verbose('MemoryCard', 'load() no storage, NOOP')
-      return
+    if (this.payload) {
+      throw new Error('memory had already loaded before.')
     }
 
-    this.payload = await this.storage.load()
+    if (this.storage) {
+      this.payload = await this.storage.load()
+    } else {
+      log.verbose('MemoryCard', 'load() no storage')
+      this.payload = {}
+    }
   }
 
   public async save (): Promise<void> {
-    log.verbose('MemoryCard', '<%s> save() to %s',
-                              this.multiplexPath(),
-                              this.storage,
-                )
-
     if (this.isMultiplex()) {
       if (!this.parent) {
         throw new Error('multiplex memory no parent')
@@ -177,13 +199,18 @@ export class MemoryCard implements AsyncMap {
       return this.parent.save()
     }
 
-    if (!this.storage) {
-      log.verbose('MemoryCard', 'save() no storage, NOOP')
-      return
-    }
+    log.verbose('MemoryCard', '<%s>%s save() to %s',
+                              this.name || '',
+                              this.multiplexPath(),
+                              this.storage || 'N/A',
+                )
 
     if (!this.payload) {
-      log.verbose('MemoryCard', 'save() no payload, NOOP')
+      throw new Error('no payload, please call load() first.')
+    }
+
+    if (!this.storage) {
+      log.verbose('MemoryCard', 'save() no storage, NOOP')
       return
     }
 
@@ -201,7 +228,6 @@ export class MemoryCard implements AsyncMap {
     ) {
       const namespace = this.multiplexNamespace()
       return key.startsWith(namespace)
-
     }
     return false
   }
@@ -271,6 +297,9 @@ export class MemoryCard implements AsyncMap {
       await this.storage.destroy()
       this.storage = undefined
     }
+
+    // to prevent to use a destroied card
+    this.payload = undefined
   }
 
   /**
@@ -287,6 +316,10 @@ export class MemoryCard implements AsyncMap {
   public get size (): Promise<number> {
     log.verbose('MemoryCard', '<%s> size', this.multiplexPath())
 
+    if (!this.payload) {
+      throw new Error('no payload, please call load() first.')
+    }
+
     let count
 
     if (this.isMultiplex()) {
@@ -302,6 +335,10 @@ export class MemoryCard implements AsyncMap {
   public async get<T = any> (name: string): Promise<undefined | T> {
     log.verbose('MemoryCard', '<%s> get(%s)', this.multiplexPath(), name)
 
+    if (!this.payload) {
+      throw new Error('no payload, please call load() first.')
+    }
+
     const key = this.resolveKey(name)
 
     return this.payload[key] as any
@@ -309,6 +346,10 @@ export class MemoryCard implements AsyncMap {
 
   public async set<T = any> (name: string, data: T): Promise<void> {
     log.verbose('MemoryCard', '<%s> set(%s, %s)', this.multiplexPath(), name, data)
+
+    if (!this.payload) {
+      throw new Error('no payload, please call load() first.')
+    }
 
     const key = this.resolveKey(name)
 
@@ -323,6 +364,10 @@ export class MemoryCard implements AsyncMap {
   public async* entries<T = any> (): AsyncIterableIterator<[string, T]> {
     log.verbose('MemoryCard', '<%s> *entries()', this.multiplexPath())
 
+    if (!this.payload) {
+      throw new Error('no payload, please call load() first.')
+    }
+
     for await (const relativeKey of this.keys()) {
       const absoluteKey       = this.resolveKey(relativeKey)
       const data: T           = this.payload[absoluteKey] as any
@@ -334,6 +379,10 @@ export class MemoryCard implements AsyncMap {
 
   public async clear (): Promise<void> {
     log.verbose('MemoryCard', '<%s> clear()', this.multiplexPath())
+
+    if (!this.payload) {
+      throw new Error('no payload, please call load() first.')
+    }
 
     if (this.isMultiplex()) {
       for (const key in this.payload) {
@@ -349,6 +398,10 @@ export class MemoryCard implements AsyncMap {
   public async delete (name: string): Promise<void> {
     log.verbose('MemoryCard', '<%s> delete(%s)', this.multiplexPath(), name)
 
+    if (!this.payload) {
+      throw new Error('no payload, please call load() first.')
+    }
+
     const key = this.resolveKey(name)
     delete this.payload[key]
   }
@@ -356,12 +409,21 @@ export class MemoryCard implements AsyncMap {
   public async has (key: string): Promise<boolean> {
     log.verbose('MemoryCard', '<%s> has(%s)', this.multiplexPath(), key)
 
+    if (!this.payload) {
+      throw new Error('no payload, please call load() first.')
+    }
+
     const absoluteKey = this.resolveKey(key)
     return absoluteKey in this.payload
   }
 
   public async *keys (): AsyncIterableIterator<string> {
     log.verbose('MemoryCard', '<%s> keys()', this.multiplexPath())
+
+    if (!this.payload) {
+      throw new Error('no payload, please call load() first.')
+    }
+
     for (const key of Object.keys(this.payload)) {
       // console.log('key', key)
       if (this.isMultiplex()) {
@@ -379,6 +441,11 @@ export class MemoryCard implements AsyncMap {
 
   public async *values<T = any> (): AsyncIterableIterator<T> {
     log.verbose('MemoryCard', '<%s> values()', this.multiplexPath())
+
+    if (!this.payload) {
+      throw new Error('no payload, please call load() first.')
+    }
+
     for await (const relativeKey of this.keys()) {
       const absoluteKey = this.resolveKey(relativeKey)
       yield this.payload[absoluteKey] as any

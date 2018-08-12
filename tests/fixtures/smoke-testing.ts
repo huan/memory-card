@@ -1,8 +1,12 @@
+// tslint:disable:no-console
+
 import { MemoryCard } from 'memory-card'
 
 async function main () {
   try {
     const card = new MemoryCard()
+    await card.load()
+
     await card.set('a', 'b')
     await card.get('a')
     console.log(`Smoke Testing v${card.version()} PASSED!`)
