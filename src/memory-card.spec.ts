@@ -16,6 +16,7 @@ import {
 
 test('smoke testing', async t => {
   const card = new MemoryCard()
+  await card.load()
 
   t.equal(await card.size, 0, 'init with 0')
 
@@ -28,22 +29,24 @@ test('smoke testing', async t => {
   t.equal(await card.size, 0, 'clear reset to 0')
 })
 
-test.only('storage file load/save', async t => {
+test('storage file load/save', async t => {
   const EXPECTED_KEY = 'key'
   const EXPECTED_VAL = 'val'
+  const NAME = Math.random().toString().substr(2)
 
   const card = new MemoryCard({
-    name: 'test',
+    name: NAME,
     storageOptions: {
       type: 'file',
     }
   })
+  await card.load()
 
   await card.set(EXPECTED_KEY, EXPECTED_VAL)
   await card.save()
 
   const cardB = new MemoryCard({
-    name: 'test',
+    name: NAME,
     storageOptions: {
       type: 'file',
     }
@@ -73,6 +76,7 @@ test('storage aws s3 load/save', async t => {
     name: NAME,
     storageOptions,
   })
+  await card.load()
 
   await card.set(EXPECTED_KEY, EXPECTED_VAL)
   await card.save()
@@ -87,4 +91,22 @@ test('storage aws s3 load/save', async t => {
 
   await card.destroy()
   await cardB.destroy()
+})
+
+test('save() throw exception before load()', async t => {
+  const NAME = Math.random().toString().substr(2)
+
+  const card = new MemoryCard({
+    name: NAME,
+    storageOptions: {
+      type: 'file',
+    }
+  })
+
+  try {
+    await card.save()
+    t.fail('should not call save() success')
+  } catch (e) {
+    t.pass('should throw to call save() before load()')
+  }
 })

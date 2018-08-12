@@ -9,6 +9,7 @@ import {
 
 test('integrate testing', async t => {
   const card = new MemoryCard()
+  await card.load()
 
   t.equal(await card.size, 0, 'init with 0')
 

@@ -1,3 +1,5 @@
+// tslint:disable:no-console
+
 import { MemoryCard } from 'memory-card'
 
 async function main () {
