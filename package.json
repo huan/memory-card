@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zixia/memory-card.git"
+    "url": "git+https://github.com/huan/memory-card.git"
   },
   "keywords": [
     "async",
@@ -37,9 +37,9 @@
   "author": "Huan LI <zixia@zixia.net>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/zixia/memory-card/issues"
+    "url": "https://github.com/huan/memory-card/issues"
   },
-  "homepage": "https://github.com/zixia/memory-card#readme",
+  "homepage": "https://github.com/huan/memory-card#readme",
   "devDependencies": {
     "@types/blue-tape": "^0.1.31",
     "@types/node": "^10.1.4",
