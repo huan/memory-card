@@ -421,7 +421,7 @@ test('multiplex save()', async t => {
 
   const sandbox = sinon.createSandbox()
 
-  const stub = sandbox.stub(card, 'save').callsFake(() => { /* void */ })
+  const stub = sandbox.stub(card, 'save').callsFake(async () => { /* void */ })
 
   await cardA.save()
   t.equal(stub.callCount, 1, 'multiplexed memory should call parent save()')
