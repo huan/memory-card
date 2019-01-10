@@ -7,7 +7,7 @@
 
 Memory Card is an Easy to Use Key/Value Store, with Swagger API Backend &amp; Serialization Support.
 
-- It is design for distribution scenarios.
+- It is design for using in distribution scenarios.
 - It is NOT design for performance.
 
 ![Memory Card](https://huan.github.io/memory-card/images/memory-card-logo.png)
