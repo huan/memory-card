@@ -6,7 +6,7 @@ import { StorageS3 } from './s3'
 
 import { AWS_SETTING } from '../../tests/fixtures'
 
-test('smoke testing', async t => {
+test.skip('amazon s3 storage smoke testing', async t => {
   const EXPECTED_PAYLOAD = { mol: 42 }
   const NAME             = Math.random().toString().substr(2)
 

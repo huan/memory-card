@@ -59,7 +59,7 @@ test('storage file load/save', async t => {
   await cardB.destroy()
 })
 
-test('storage aws s3 load/save', async t => {
+test.skip('storage aws s3 load/save', async t => {
   const EXPECTED_KEY = 'key'
   const EXPECTED_VAL = 'val'
   const NAME         = Math.random().toString().substr(2)

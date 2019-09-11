@@ -65,7 +65,7 @@
     "tag": "latest"
   },
   "dependencies": {
-    "aws-sdk": "^2.437.0",
+    "aws-sdk": "^2.526.0",
     "brolog": "^1.6.2"
   }
 }
