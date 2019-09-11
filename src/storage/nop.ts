@@ -35,7 +35,7 @@ export class StorageNop extends StorageBackend {
     return {}
   }
 
-  public async save (_: MemoryCardPayload): Promise<void> {
+  public async save (_ /* payload */ : MemoryCardPayload): Promise<void> {
     log.verbose('StorageNop', 'save()')
   }
 
