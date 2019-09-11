@@ -7,7 +7,9 @@ export {
 }               from './async-map.type'
 export {
   log,
+  VERSION,
 }               from './config'
+
 export {
   MemoryCard,
 }
