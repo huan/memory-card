@@ -12,6 +12,7 @@ import {
 import { MemoryCardPayload }      from './types'
 
 class MemoryCardTest extends MemoryCard {
+
   public get payload () {
     return super.payload
   }
@@ -29,6 +30,7 @@ class MemoryCardTest extends MemoryCard {
   public isMultiplexKey (key: string): boolean {
     return super.isMultiplexKey(key)
   }
+
 }
 
 test('multiplex set() & get()', async t => {
@@ -348,13 +350,13 @@ test('multiplex toString()', async t => {
 
   t.equal(cardNoName.toString(), 'MemoryCard<test>', 'should get toString with empty name')
   t.equal(cardNoNameA.toString(), `MemoryCard<test>.multiplex(${MULTIPLEX_NAME})`,
-                                  'should get toString with empty name . multiplex(xxx)',
-          )
+    'should get toString with empty name . multiplex(xxx)',
+  )
 
   t.equal(card.toString(), `MemoryCard<${NAME}>`, 'should get toString with name')
   t.equal(cardA.toString(), `MemoryCard<${NAME}>.multiplex(${MULTIPLEX_NAME})`,
-                            'should get toString with name & sub name',
-          )
+    'should get toString with name & sub name',
+  )
 })
 
 test('multiplex multiplexKey()', async t => {

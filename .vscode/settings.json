@@ -18,5 +18,9 @@
                                // If this value is negative, it means don't align the trailing comment.
     }
   },
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "eslint.validate": [
+    "javascript",
+    "typescript",
+  ],
 }

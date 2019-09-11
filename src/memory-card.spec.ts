@@ -38,7 +38,7 @@ test('storage file load/save', async t => {
     name: NAME,
     storageOptions: {
       type: 'file',
-    }
+    },
   })
   await card.load()
 
@@ -49,7 +49,7 @@ test('storage file load/save', async t => {
     name: NAME,
     storageOptions: {
       type: 'file',
-    }
+    },
   })
   await cardB.load()
 
@@ -100,7 +100,7 @@ test('save() throw exception before load()', async t => {
     name: NAME,
     storageOptions: {
       type: 'file',
-    }
+    },
   })
 
   try {
@@ -118,7 +118,7 @@ test('load() twice should throw error', async t => {
     name: NAME,
     storageOptions: {
       type: 'file',
-    }
+    },
   })
 
   try {

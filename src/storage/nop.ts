@@ -13,6 +13,7 @@ import {
 }                         from './backend-config'
 
 export class StorageNop extends StorageBackend {
+
   constructor (
     name    : string,
     options : StorageBackendOptions,
@@ -34,11 +35,12 @@ export class StorageNop extends StorageBackend {
     return {}
   }
 
-  public async save (payload: MemoryCardPayload): Promise<void> {
+  public async save (_: MemoryCardPayload): Promise<void> {
     log.verbose('StorageNop', 'save()')
   }
 
   public async destroy (): Promise<void> {
     log.verbose('StorageNop', 'destroy()')
   }
+
 }

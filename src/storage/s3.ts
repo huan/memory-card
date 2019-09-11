@@ -16,6 +16,7 @@ import {
 }                         from './backend-config'
 
 export class StorageS3 extends StorageBackend {
+
   private s3: S3
 
   constructor (
@@ -57,7 +58,6 @@ export class StorageS3 extends StorageBackend {
       Bucket : options.bucket,
       Key    : this.name,
     }).promise()
-    return
   }
 
   public async load (): Promise<MemoryCardPayload> {
@@ -93,6 +93,6 @@ export class StorageS3 extends StorageBackend {
       Bucket : options.bucket,
       Key    : this.name,
     }).promise()
-    return
   }
+
 }

@@ -12,7 +12,7 @@ export interface StorageS3Options {
   accessKeyId     : string,
   secretAccessKey : string,
   region          : string,
-  ////////////////////////
+  // //////////////////////
   bucket : string,
 }
 
@@ -25,6 +25,6 @@ export const BACKEND_DICT = {
 export type StorageBackendType = keyof typeof BACKEND_DICT
 
 export type StorageBackendOptions =
-    ( { type?: 'file' }  & StorageFileOptions )
-  | ( { type?: 'nop' }   & StorageNopOptions )
-  | ( { type?: 's3' }    & StorageS3Options )
+    ({ type?: 'file' }  & StorageFileOptions)
+  | ({ type?: 'nop' }   & StorageNopOptions)
+  | ({ type?: 's3' }    & StorageS3Options)

@@ -17,6 +17,7 @@ import {
 }                         from './backend-config'
 
 export class StorageFile extends StorageBackend {
+
   private readonly absFileName: string
 
   constructor (
@@ -31,11 +32,11 @@ export class StorageFile extends StorageBackend {
     options = options as StorageFileOptions
 
     this.absFileName = path.isAbsolute(this.name)
-                        ? this.name
-                        : path.resolve(
-                            process.cwd(),
-                            this.name,
-                          )
+      ? this.name
+      : path.resolve(
+        process.cwd(),
+        this.name,
+      )
     if (!/\.memory-card\.json$/.test(this.absFileName)) {
       this.absFileName +=  '.memory-card.json'
     }
@@ -98,4 +99,5 @@ export class StorageFile extends StorageBackend {
       fs.unlinkSync(this.absFileName)
     }
   }
+
 }

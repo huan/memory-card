@@ -10,6 +10,7 @@ import {
 }                         from './backend-config'
 
 export abstract class StorageBackend {
+
   constructor (
     protected name    : string,
     protected options : StorageBackendOptions,
@@ -20,4 +21,5 @@ export abstract class StorageBackend {
   public abstract save (payload: MemoryCardPayload) : Promise<void>
   public abstract load ()                           : Promise<MemoryCardPayload>
   public abstract destroy ()                        : Promise<void>
+
 }
