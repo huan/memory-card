@@ -1,15 +1,22 @@
 // tslint:disable:no-console
 
-import { MemoryCard } from 'memory-card'
+import {
+  MemoryCard,
+  VERSION,
+}               from 'memory-card'
 
 async function main () {
   try {
+    if (VERSION === '0.0.0') {
+      throw new Error('version not set right before publish!')
+    }
+
     const card = new MemoryCard()
     await card.load()
 
     await card.set('a', 'b')
     await card.get('a')
-    console.log(`Smoke Testing v${card.version()} PASSED!`)
+    console.info(`Smoke Testing v${card.version()} PASSED!`)
     return 0
   } catch (e) {
     console.error(e)
@@ -18,8 +25,8 @@ async function main () {
 }
 
 main()
-.then(process.exit)
-.catch(e => {
-  console.error(e)
-  process.exit(1)
-})
+  .then(process.exit)
+  .catch(e => {
+    console.error(e)
+    process.exit(1)
+  })

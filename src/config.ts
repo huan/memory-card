@@ -1,4 +1,4 @@
-// tslint:disable:no-var-requires
+import { VERSION } from './version'
 
 // https://github.com/Microsoft/TypeScript/issues/14151#issuecomment-280812617
 if (!Symbol.asyncIterator) {
@@ -9,12 +9,6 @@ export {
   log,
 }           from 'brolog'
 
-let version = '0.0.0'
-
-try {
-  version = require('../../package.json').version
-} catch (e) {
-  version = require('../package.json')
+export {
+  VERSION,
 }
-
-export const VERSION = version
