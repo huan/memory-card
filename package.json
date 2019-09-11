@@ -1,6 +1,6 @@
 {
   "name": "memory-card",
-  "version": "0.6.18",
+  "version": "0.6.19",
   "description": "ES6 Map like Async API, with Swagger API Backend Support.",
   "main": "dist/src/index.js",
   "typings": "dist/src/index.d.ts",
