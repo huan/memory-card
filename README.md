@@ -4,7 +4,7 @@
 [![npm (next)](https://img.shields.io/npm/v/memory-card/next.svg)](https://www.npmjs.com/package/memory-card?activeTab=versions)
 [![Powered by TypeScript](https://img.shields.io/badge/Powered%20By-TypeScript-blue.svg)](https://www.typescriptlang.org/)
 [![Build Status](https://travis-ci.com/huan/memory-card.svg?branch=master)](https://travis-ci.com/huan/memory-card)
-[![Greenkeeper badge](https://badges.greenkeeper.io/huan/memory-card.svg)](https://greenkeeper.io/)
+
 
 Memory Card is an Easy to Use Key/Value Store, with Swagger API Backend &amp; Serialization Support.
 
