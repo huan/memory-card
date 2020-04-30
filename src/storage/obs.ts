@@ -1,6 +1,3 @@
-// tslint:disable-next-line:no-var-requires
-const ObsClient = require('esdk-obs-nodejs')
-
 import {
   log,
 }                     from '../config'
@@ -15,6 +12,8 @@ import {
   StorageBackendOptions,
   StorageObsOptions,
 }                         from './backend-config'
+// tslint:disable-next-line:no-var-requires
+const ObsClient = require('esdk-obs-nodejs')
 
 export class StorageObs extends StorageBackend {
 
