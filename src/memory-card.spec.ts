@@ -5,6 +5,7 @@ import test from 'blue-tape'
 
 import {
   AWS_SETTING,
+  OBS_SETTING,
 }                 from '../tests/fixtures'
 
 import {
@@ -88,6 +89,40 @@ test.skip('storage aws s3 load/save', async t => {
   await cardB.load()
 
   t.equal(await cardB.get(EXPECTED_KEY), EXPECTED_VAL, 'should get val back from s3')
+
+  await card.destroy()
+  await cardB.destroy()
+})
+
+test.skip('storage huawei obs load/save', async t => {
+  const EXPECTED_KEY = 'key'
+  const EXPECTED_VAL = 'val'
+  const NAME         = Math.random().toString().substr(2)
+
+  const storageOptions = {
+    accessKeyId     : OBS_SETTING.ACCESS_KEY_ID,
+    bucket          : OBS_SETTING.BUCKET,
+    secretAccessKey : OBS_SETTING.SECRET_ACCESS_KEY,
+    server          : OBS_SETTING.SERVER,
+    type            : 'obs',
+  } as StorageBackendOptions
+
+  const card = new MemoryCard({
+    name: NAME,
+    storageOptions,
+  })
+  await card.load()
+
+  await card.set(EXPECTED_KEY, EXPECTED_VAL)
+  await card.save()
+
+  const cardB = new MemoryCard({
+    name: NAME,
+    storageOptions,
+  })
+  await cardB.load()
+
+  t.equal(await cardB.get(EXPECTED_KEY), EXPECTED_VAL, 'should get val back from obs')
 
   await card.destroy()
   await cardB.destroy()
