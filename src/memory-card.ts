@@ -176,7 +176,7 @@ export class MemoryCard implements AsyncMap {
     log.verbose('MemoryCard', 'load() from storage: %s', this.storage || 'N/A')
 
     if (this.isMultiplex()) {
-      log.warn('MemoryCard', 'load() should not be called on a multiplex MemoryCard. NOOP')
+      log.verbose('MemoryCard', 'load() should not be called on a multiplex MemoryCard. NOOP')
       return
     }
 
