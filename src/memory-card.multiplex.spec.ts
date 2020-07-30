@@ -16,9 +16,11 @@ class MemoryCardTest extends MemoryCard {
   public get payload () {
     return super.payload
   }
+
   public set payload (data: undefined | MemoryCardPayload) {
     super.payload = data
   }
+
   public resolveKey (key: string): string {
     return super.resolveKey(key)
   }

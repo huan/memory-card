@@ -3,9 +3,6 @@ import {
 }               from './memory-card'
 
 export {
-  AsyncMap,
-}               from './async-map.type'
-export {
   log,
   VERSION,
 }               from './config'
