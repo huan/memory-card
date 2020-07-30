@@ -13,7 +13,7 @@ import {
 }                           from './memory-card'
 import {
   StorageBackendOptions,
-}                           from './storage'
+}                           from './storage/mod'
 
 test('smoke testing', async t => {
   const card = new MemoryCard()

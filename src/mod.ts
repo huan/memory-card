@@ -2,12 +2,14 @@ import {
   MemoryCard,
 }               from './memory-card'
 
-export {
+import {
   log,
   VERSION,
 }               from './config'
 
 export {
   MemoryCard,
+  VERSION,
+  log,
 }
 export default MemoryCard

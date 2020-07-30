@@ -12,7 +12,7 @@ import {
   getStorage,
   StorageBackend,
   StorageBackendOptions,
-}                         from './storage'
+}                         from './storage/mod'
 import {
   MemoryCardPayload,
 }                       from './types'
