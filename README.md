@@ -1,10 +1,9 @@
 # MEMORY CARD
 
-[![NPM Version](https://badge.fury.io/js/memory-card.svg)](https://badge.fury.io/js/memory-card)
+[![NPM Version](https://img.shields.io/npm/v/memory-card?color=brightgreen)](https://www.npmjs.com/package/memory-card)
 [![npm (next)](https://img.shields.io/npm/v/memory-card/next.svg)](https://www.npmjs.com/package/memory-card?activeTab=versions)
-[![Powered by TypeScript](https://img.shields.io/badge/Powered%20By-TypeScript-blue.svg)](https://www.typescriptlang.org/)
-[![Build Status](https://travis-ci.com/huan/memory-card.svg?branch=master)](https://travis-ci.com/huan/memory-card)
-
+[![GitHub Action](https://github.com/huan/memory-card/workflows/NPM/badge.svg)](https://github.com/huan/memory-card/actions?query=workflow%3ANPM)
+[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-blue.svg)](https://www.typescriptlang.org/)
 
 Memory Card is an Easy to Use Key/Value Store, with Swagger API Backend &amp; Serialization Support.
 
