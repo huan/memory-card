@@ -2,15 +2,14 @@ import {
   MemoryCard,
 }               from './memory-card'
 
-export {
-  AsyncMap,
-}               from './async-map.type'
-export {
+import {
   log,
   VERSION,
 }               from './config'
 
 export {
   MemoryCard,
+  VERSION,
+  log,
 }
 export default MemoryCard

@@ -112,7 +112,7 @@ export class StorageObs extends StorageBackend {
           if (result.CommonMsg.Status === 200) {
             resolve()
           } else {
-            reject(new Error(`obs putObject error`))
+            reject(new Error('obs putObject error'))
           }
         }
       })
@@ -154,7 +154,7 @@ export class StorageObs extends StorageBackend {
             const obj = JSON.parse(str)
             resolve((JSON.parse(obj.Body)) as MemoryCardPayload)
           } else {
-            reject(new Error(`obs getObject error`))
+            reject(new Error('obs getObject error'))
           }
         }
       })
@@ -188,7 +188,7 @@ export class StorageObs extends StorageBackend {
           if (result.CommonMsg.Status < 300) {
             resolve()
           } else {
-            reject(new Error(`obs deleteObject error`))
+            reject(new Error('obs deleteObject error'))
           }
         }
       })

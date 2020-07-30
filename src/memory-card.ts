@@ -2,6 +2,7 @@
 // if (!Symbol.asyncIterator) {
 //   (<any>Symbol).asyncIterator =  Symbol.for('Symbol.asyncIterator')
 // }
+import { AsyncMapLike } from 'async-map-like'
 
 import {
   log,
@@ -11,9 +12,8 @@ import {
   getStorage,
   StorageBackend,
   StorageBackendOptions,
-}                         from './storage'
+}                         from './storage/mod'
 import {
-  AsyncMap,
   MemoryCardPayload,
 }                       from './types'
 
@@ -38,7 +38,7 @@ export interface MemoryCardJsonObject {
   options: MemoryCardOptions,
 }
 
-export class MemoryCard implements AsyncMap {
+export class MemoryCard implements AsyncMapLike<any, any> {
 
   /**
    *
@@ -47,9 +47,9 @@ export class MemoryCard implements AsyncMap {
    *
    *
    */
-  public static VERSION = VERSION
+  static VERSION = VERSION
 
-  public fromJSON (textOrObj: string | MemoryCardJsonObject): MemoryCard {
+  fromJSON (textOrObj: string | MemoryCardJsonObject): MemoryCard {
     log.verbose('MemoryCard', 'fromJSON(...)')
 
     let jsonObj: MemoryCardJsonObject
@@ -94,7 +94,7 @@ export class MemoryCard implements AsyncMap {
    *
    *
    */
-  public name?: string
+  name?: string
 
   protected parent?           : MemoryCard
   protected payload?          : MemoryCardPayload
@@ -134,7 +134,7 @@ export class MemoryCard implements AsyncMap {
     }
   }
 
-  public toString () {
+  toString () {
     let mpString = ''
     if (this.multiplexNameList.length > 0) {
       mpString = this.multiplexNameList
@@ -149,7 +149,7 @@ export class MemoryCard implements AsyncMap {
     return `MemoryCard<${name}>${mpString}`
   }
 
-  public version (): string {
+  version (): string {
     return VERSION
   }
 
@@ -172,7 +172,7 @@ export class MemoryCard implements AsyncMap {
     return storage
   }
 
-  public async load (): Promise<void> {
+  async load (): Promise<void> {
     log.verbose('MemoryCard', 'load() from storage: %s', this.storage || 'N/A')
 
     if (this.isMultiplex()) {
@@ -192,7 +192,7 @@ export class MemoryCard implements AsyncMap {
     }
   }
 
-  public async save (): Promise<void> {
+  async save (): Promise<void> {
     if (this.isMultiplex()) {
       if (!this.parent) {
         throw new Error('multiplex memory no parent')
@@ -255,7 +255,7 @@ export class MemoryCard implements AsyncMap {
     }
   }
 
-  public isMultiplex (): boolean {
+  isMultiplex (): boolean {
     return this.multiplexNameList.length > 0
   }
 
@@ -267,12 +267,12 @@ export class MemoryCard implements AsyncMap {
    * @deprecated use multiplex() instead
    * @hidden
    */
-  public sub (name: string): this {
+  sub (name: string): this {
     log.warn('MemoryCard', 'sub() DEPRECATED, use multiplex() instead')
     return this.multiplex(name)
   }
 
-  public multiplex (name: string): this {
+  multiplex (name: string): this {
     log.verbose('MemoryCard', 'multiplex(%s)', name)
 
     // FIXME: as any ?
@@ -285,7 +285,7 @@ export class MemoryCard implements AsyncMap {
    *
    */
 
-  public async destroy (): Promise<void> {
+  async destroy (): Promise<void> {
     log.verbose('MemoryCard', 'destroy() storage: %s', this.storage || 'N/A')
 
     if (this.isMultiplex()) {
@@ -314,7 +314,7 @@ export class MemoryCard implements AsyncMap {
   /**
    * size
    */
-  public get size (): Promise<number> {
+  get size (): Promise<number> {
     log.verbose('MemoryCard', '<%s> size', this.multiplexPath())
 
     if (!this.payload) {
@@ -333,7 +333,7 @@ export class MemoryCard implements AsyncMap {
     return Promise.resolve(count)
   }
 
-  public async get<T = any> (name: string): Promise<undefined | T> {
+  async get<T = any> (name: string): Promise<undefined | T> {
     log.verbose('MemoryCard', '<%s> get(%s)', this.multiplexPath(), name)
 
     if (!this.payload) {
@@ -345,7 +345,7 @@ export class MemoryCard implements AsyncMap {
     return this.payload[key] as any
   }
 
-  public async set<T = any> (name: string, data: T): Promise<void> {
+  async set<T = any> (name: string, data: T): Promise<this> {
     log.verbose('MemoryCard', '<%s> set(%s, %s)', this.multiplexPath(), name, data)
 
     if (!this.payload) {
@@ -355,14 +355,16 @@ export class MemoryCard implements AsyncMap {
     const key = this.resolveKey(name)
 
     this.payload[key] = data as any
+
+    return this
   }
 
-  public async * [Symbol.asyncIterator]<T = any> (): AsyncIterableIterator<[string, T]> {
+  async * [Symbol.asyncIterator]<T = any> (): AsyncIterableIterator<[string, T]> {
     log.verbose('MemoryCard', '<%s> *[Symbol.asyncIterator]()', this.multiplexPath())
     yield * this.entries()
   }
 
-  public async * entries<T = any> (): AsyncIterableIterator<[string, T]> {
+  async * entries<T = any> (): AsyncIterableIterator<[string, T]> {
     log.verbose('MemoryCard', '<%s> *entries()', this.multiplexPath())
 
     if (!this.payload) {
@@ -378,7 +380,7 @@ export class MemoryCard implements AsyncMap {
     }
   }
 
-  public async clear (): Promise<void> {
+  async clear (): Promise<void> {
     log.verbose('MemoryCard', '<%s> clear()', this.multiplexPath())
 
     if (!this.payload) {
@@ -396,7 +398,7 @@ export class MemoryCard implements AsyncMap {
     }
   }
 
-  public async delete (name: string): Promise<void> {
+  async delete (name: string): Promise<boolean> {
     log.verbose('MemoryCard', '<%s> delete(%s)', this.multiplexPath(), name)
 
     if (!this.payload) {
@@ -404,10 +406,16 @@ export class MemoryCard implements AsyncMap {
     }
 
     const key = this.resolveKey(name)
-    delete this.payload[key]
+
+    if (key in this.payload) {
+      delete this.payload[key]
+      return true
+    } else {
+      return false
+    }
   }
 
-  public async has (key: string): Promise<boolean> {
+  async has (key: string): Promise<boolean> {
     log.verbose('MemoryCard', '<%s> has(%s)', this.multiplexPath(), key)
 
     if (!this.payload) {
@@ -418,7 +426,7 @@ export class MemoryCard implements AsyncMap {
     return absoluteKey in this.payload
   }
 
-  public async * keys (): AsyncIterableIterator<string> {
+  async * keys (): AsyncIterableIterator<string> {
     log.verbose('MemoryCard', '<%s> keys()', this.multiplexPath())
 
     if (!this.payload) {
@@ -440,7 +448,7 @@ export class MemoryCard implements AsyncMap {
     }
   }
 
-  public async * values<T = any> (): AsyncIterableIterator<T> {
+  async * values<T = any> (): AsyncIterableIterator<T> {
     log.verbose('MemoryCard', '<%s> values()', this.multiplexPath())
 
     if (!this.payload) {
@@ -450,6 +458,19 @@ export class MemoryCard implements AsyncMap {
     for await (const relativeKey of this.keys()) {
       const absoluteKey = this.resolveKey(relativeKey)
       yield this.payload[absoluteKey] as any
+    }
+  }
+
+  async forEach<T> (
+    callbackfn: (
+      value: T,
+      key: string,
+      map: any,
+    ) => void,
+    thisArg?: any,
+  ): Promise<void> {
+    for await (const [key, value] of this.entries()) {
+      callbackfn.call(thisArg, value, key, this)
     }
   }
 
