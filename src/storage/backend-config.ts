@@ -1,7 +1,5 @@
 import { StorageFile }  from './file'
 import { StorageNop }   from './nop'
-import { StorageObs }   from './obs'
-import { StorageS3 }    from './s3'
 
 export interface StorageNopOptions {
   placeholder?: never
@@ -25,14 +23,14 @@ export interface StorageObsOptions {
   bucket : string,
 }
 
-export const BACKEND_DICT = {
-  file : StorageFile,
-  nop  : StorageNop,
-  obs  : StorageObs,
-  s3   : StorageS3,
+export const BACKEND_FACTORY_DICT = {
+  file : () => StorageFile,
+  nop  : () => StorageNop,
+  obs  : () => require('./obs'),
+  s3   : () => require('./s3'),
 }
 
-export type StorageBackendType = keyof typeof BACKEND_DICT
+export type StorageBackendType = keyof typeof BACKEND_FACTORY_DICT
 
 export type StorageBackendOptions =
     ({ type?: 'file' }  & StorageFileOptions)
