@@ -1,4 +1,4 @@
-import S3 from 'aws-sdk/clients/s3'
+import type S3 from 'aws-sdk/clients/s3'
 
 import {
   log,
@@ -15,6 +15,8 @@ import {
   StorageS3Options,
 }                         from './backend-config'
 
+const S3Ctor: typeof S3 = require('aws-sdk/clients/s3')
+
 export class StorageS3 extends StorageBackend {
 
   private s3: S3
@@ -29,7 +31,7 @@ export class StorageS3 extends StorageBackend {
     super(name, options)
     options = options as StorageS3Options
 
-    this.s3 = new S3({
+    this.s3 = new S3Ctor({
       credentials: {
         accessKeyId     : options.accessKeyId,
         secretAccessKey : options.secretAccessKey,
