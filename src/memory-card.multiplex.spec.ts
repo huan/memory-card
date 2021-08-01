@@ -9,17 +9,17 @@ import {
   NAMESPACE_KEY_SEPRATOR,
   NAMESPACE_MULTIPLEX_SEPRATOR,
 }                                 from './memory-card'
-import { MemoryCardPayload }      from './types'
+// import { MemoryCardPayload }      from './types'
 
 class MemoryCardTest extends MemoryCard {
 
-  public get payload () {
-    return super.payload
-  }
+  // public get payload () {
+  //   return super.payload
+  // }
 
-  public set payload (data: undefined | MemoryCardPayload) {
-    super.payload = data
-  }
+  // public set payload (data: undefined | MemoryCardPayload) {
+  //   super.payload = data
+  // }
 
   public resolveKey (key: string): string {
     return super.resolveKey(key)

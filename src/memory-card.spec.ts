@@ -60,17 +60,19 @@ test('storage file load/save', async t => {
   await cardB.destroy()
 })
 
-test.skip('storage aws s3 load/save', async t => {
+test('storage aws s3 load/save', async t => {
+  if (!AWS_SETTING) {
+    t.skip('AWS S3 environment variable not found.')
+    return
+  }
+
   const EXPECTED_KEY = 'key'
   const EXPECTED_VAL = 'val'
   const NAME         = Math.random().toString().substr(2)
 
   const storageOptions = {
-    accessKeyId     : AWS_SETTING.ACCESS_KEY_ID,
-    bucket          : AWS_SETTING.BUCKET,
-    region          : AWS_SETTING.REGION,
-    secretAccessKey : AWS_SETTING.SECRET_ACCESS_KEY,
-    type            : 's3',
+    ...AWS_SETTING,
+    type: 's3',
   } as StorageBackendOptions
 
   const card = new MemoryCard({

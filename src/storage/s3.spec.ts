@@ -2,19 +2,14 @@
 
 import test from 'blue-tape'
 
-import { StorageBackendOptions } from './backend-config'
+import {
+  AWS_SETTING,
+}                 from '../../tests/fixtures'
+
 import { StorageS3 } from './s3'
 
 test('amazon s3 storage smoke testing', async t => {
-
-  const awsConfig: Partial<StorageBackendOptions> = {
-    accessKeyId     : process.env['AWS_ACCESS_KEY_ID'],
-    bucket          : process.env['AWS_S3_BUCKET'],
-    region          : process.env['AWS_REGION'],
-    secretAccessKey : process.env['AWS_SECRET_ACCESS_KEY'],
-  }
-
-  if (Object.values(awsConfig).some(x => !x)) {
+  if (!AWS_SETTING) {
     t.skip('AWS S3 environment variables not set.')
     return
   }
@@ -24,7 +19,7 @@ test('amazon s3 storage smoke testing', async t => {
 
   const s3 = new StorageS3(
     NAME,
-    awsConfig as StorageBackendOptions,
+    AWS_SETTING,
   )
 
   let empty = await s3.load()

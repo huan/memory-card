@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node: [10, 12, 14]
+        node: [10, 12, 14, 16]
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -23,6 +23,11 @@ jobs:
 
       - name: Test
         run: npm test
+        env:
+          AWS_ACCESS_KEY_ID     : ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_S3_BUCKET         : ${{ secrets.AWS_S3_BUCKET }}
+          AWS_REGION            : ${{ secrets.AWS_REGION }}
+          AWS_SECRET_ACCESS_KEY : ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
   pack:
     name: Pack
@@ -42,8 +47,6 @@ jobs:
 
       - name: Pack Testing
         run: ./scripts/npm-pack-testing.sh
-        env:
-          WECHATY_PUPPET_HOSTIE_TOKEN: ${{ secrets.WECHATY_PUPPET_HOSTIE_TOKEN }}
 
   publish:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/v'))
