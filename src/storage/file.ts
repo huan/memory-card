@@ -16,7 +16,7 @@ import {
   StorageFileOptions,
 }                         from './backend-config'
 
-export class StorageFile extends StorageBackend {
+class StorageFile extends StorageBackend {
 
   private readonly absFileName: string
 
@@ -100,4 +100,9 @@ export class StorageFile extends StorageBackend {
     }
   }
 
+}
+
+export default StorageFile
+export {
+  StorageFile,
 }

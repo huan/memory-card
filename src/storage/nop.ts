@@ -12,7 +12,7 @@ import {
   StorageBackendOptions,
 }                         from './backend-config'
 
-export class StorageNop extends StorageBackend {
+class StorageNop extends StorageBackend {
 
   constructor (
     name    : string,
@@ -43,4 +43,9 @@ export class StorageNop extends StorageBackend {
     log.verbose('StorageNop', 'destroy()')
   }
 
+}
+
+export default StorageNop
+export {
+  StorageNop,
 }

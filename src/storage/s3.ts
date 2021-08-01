@@ -17,7 +17,7 @@ import {
 
 const S3Ctor: typeof S3 = require('aws-sdk/clients/s3')
 
-export class StorageS3 extends StorageBackend {
+class StorageS3 extends StorageBackend {
 
   private s3: S3
 
@@ -99,4 +99,9 @@ export class StorageS3 extends StorageBackend {
     }).promise()
   }
 
+}
+
+export default StorageS3
+export {
+  StorageS3,
 }

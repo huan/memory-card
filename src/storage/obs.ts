@@ -15,7 +15,7 @@ import {
 // tslint:disable-next-line:no-var-requires
 const ObsClient = require('esdk-obs-nodejs')
 
-export class StorageObs extends StorageBackend {
+class StorageObs extends StorageBackend {
 
   private obs: any
 
@@ -195,4 +195,9 @@ export class StorageObs extends StorageBackend {
     })
   }
 
+}
+
+export default StorageObs
+export {
+  StorageObs,
 }
