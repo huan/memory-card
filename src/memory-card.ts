@@ -475,6 +475,13 @@ export class MemoryCard implements AsyncMapLike<any, any> {
   }
 
   /**
+   * Huan(202108): FIXME
+   *  I totally forget what are the following two methods are...
+   */
+  [Symbol.iterator] () : AsyncIterableIterator<[string, number]> { return {} as any }
+  get [Symbol.toStringTag] () { return Promise.resolve('MemoryCardStringTag') }
+
+  /**
    *
    * ES6 Map API (Async Version)
    *
