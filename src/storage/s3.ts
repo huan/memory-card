@@ -80,8 +80,10 @@ export class StorageS3 extends StorageBackend {
       return JSON.parse(result.Body.toString())
 
     } catch (e) {
-      log.warn('StorageS3', 'load() exception: %s', e)
-      return {}
+      if (/^4/.test(e.statusCode)) {
+        return {}
+      }
+      throw e
     }
 
   }

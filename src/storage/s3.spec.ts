@@ -2,22 +2,29 @@
 
 import test from 'blue-tape'
 
+import { StorageBackendOptions } from './backend-config'
 import { StorageS3 } from './s3'
 
-import { AWS_SETTING } from '../../tests/fixtures'
+test('amazon s3 storage smoke testing', async t => {
 
-test.skip('amazon s3 storage smoke testing', async t => {
+  const awsConfig: Partial<StorageBackendOptions> = {
+    accessKeyId     : process.env['AWS_ACCESS_KEY_ID'],
+    bucket          : process.env['AWS_S3_BUCKET'],
+    region          : process.env['AWS_REGION'],
+    secretAccessKey : process.env['AWS_SECRET_ACCESS_KEY'],
+  }
+
+  if (Object.values(awsConfig).some(x => !x)) {
+    t.skip('AWS S3 environment variables not set.')
+    return
+  }
+
   const EXPECTED_PAYLOAD = { mol: 42 }
-  const NAME             = Math.random().toString().substr(2)
+  const NAME             = 'tmp/memory-card-unit-test-' + Math.random().toString().substr(2)
 
   const s3 = new StorageS3(
     NAME,
-    {
-      accessKeyId     : AWS_SETTING.ACCESS_KEY_ID,
-      bucket          : AWS_SETTING.BUCKET,
-      region          : AWS_SETTING.REGION,
-      secretAccessKey : AWS_SETTING.SECRET_ACCESS_KEY,
-    },
+    awsConfig as StorageBackendOptions,
   )
 
   let empty = await s3.load()
