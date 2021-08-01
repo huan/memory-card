@@ -1,5 +1,7 @@
 import { StorageFile }  from './file'
 import { StorageNop }   from './nop'
+import { StorageObs } from './obs'
+import { StorageS3 } from './s3'
 
 export interface StorageNopOptions {
   placeholder?: never
@@ -23,11 +25,27 @@ export interface StorageObsOptions {
   bucket : string,
 }
 
+function obsLoader (): typeof StorageObs {
+  const m = require('./obs')
+  if (m) {
+    return m
+  }
+  throw new Error('Load OBS Storage failed: have you installed the "esdk-obs-nodejs" NPM module?')
+}
+
+function s3Loader (): typeof StorageS3 {
+  const m = require('./s3')
+  if (m) {
+    return m
+  }
+  throw new Error('Load S3 Storage failed: have you installed the "aws-sdk" NPM module?')
+}
+
 export const BACKEND_FACTORY_DICT = {
   file : () => StorageFile,
   nop  : () => StorageNop,
-  obs  : () => require('./obs'),
-  s3   : () => require('./s3'),
+  obs  : obsLoader,
+  s3   : s3Loader,
 }
 
 export type StorageBackendType = keyof typeof BACKEND_FACTORY_DICT
