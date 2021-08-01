@@ -51,7 +51,7 @@ export class MemoryCard implements AsyncMap { ... }
 
 ## CHANGELOG
 
-### master v0.9
+### master v0.13
 
 1. Move S3 & OBS to peer dependency to reduce install size
 
