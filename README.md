@@ -80,6 +80,6 @@ Huan LI \<zixia@zixia.net\> (http://linkedin.com/in/zixia)
 
 ## COPYRIGHT & LICENSE
 
-* Code & Docs © 2017 Huan LI \<zixia@zixia.net\>
-* Code released under the Apache-2.0 License
-* Docs released under Creative Commons
+- Code & Docs © 2017 Huan LI \<zixia@zixia.net\>
+- Code released under the Apache-2.0 License
+- Docs released under Creative Commons
