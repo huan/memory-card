@@ -51,6 +51,11 @@ export class MemoryCard implements AsyncMap { ... }
 
 ## CHANGELOG
 
+### master v0.13
+
+1. Move S3 & OBS to peer dependency to reduce install size
+1. Add Etcd Storage support
+
 ### v0.6 master (Aug 2018)
 
 1. Support AWS S3 Cloud Storage
@@ -72,7 +77,7 @@ export class MemoryCard implements AsyncMap { ... }
 
 ## AUTHOR
 
-Huan LI \<zixia@zixia.net\> (http://linkedin.com/in/zixia)
+[Huan LI](http://linkedin.com/in/zixia) \<zixia@zixia.net\>
 
 <a href="http://stackoverflow.com/users/1123955/zixia">
   <img src="http://stackoverflow.com/users/flair/1123955.png" width="208" height="58" alt="profile for zixia at Stack Overflow, Q&amp;A for professional and enthusiast programmers" title="profile for zixia at Stack Overflow, Q&amp;A for professional and enthusiast programmers">
@@ -80,6 +85,6 @@ Huan LI \<zixia@zixia.net\> (http://linkedin.com/in/zixia)
 
 ## COPYRIGHT & LICENSE
 
-- Code & Docs © 2017 Huan LI \<zixia@zixia.net\>
+- Code & Docs © 2017-now Huan LI \<zixia@zixia.net\>
 - Code released under the Apache-2.0 License
 - Docs released under Creative Commons

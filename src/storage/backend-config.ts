@@ -41,16 +41,16 @@ export interface StorageEtcdOptions {
 
 function obsLoader (): typeof StorageObs {
   const m = require('./obs')
-  if (m) {
-    return m
+  if (m?.default) {
+    return m.default
   }
   throw new Error('Load OBS Storage failed: have you installed the "esdk-obs-nodejs" NPM module?')
 }
 
 function s3Loader (): typeof StorageS3 {
   const m = require('./s3')
-  if (m) {
-    return m
+  if (m?.default) {
+    return m.default
   }
   throw new Error('Load S3 Storage failed: have you installed the "aws-sdk" NPM module?')
 }
