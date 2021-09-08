@@ -45,7 +45,7 @@
     "@chatie/eslint-config": "^0.14.1",
     "@chatie/git-scripts": "^0.6.2",
     "@chatie/semver": "^0.4.7",
-    "@chatie/tsconfig": "^0.16.2",
+    "@chatie/tsconfig": "^0.20.2",
     "aws-sdk": ">=2.958.0",
     "esdk-obs-nodejs": ">=3.21.6",
     "etcd3": "^1.1.0",
