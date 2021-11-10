@@ -1,6 +1,7 @@
-import { StorageEtcd }  from './etcd.js'
 import { StorageFile }  from './file.js'
 import { StorageNop }   from './nop.js'
+
+import type { StorageEtcd }  from './etcd.js'
 import type { StorageObs }   from './obs.js'
 import type { StorageS3 }    from './s3.js'
 
@@ -59,12 +60,14 @@ async function s3Loader (): Promise<typeof StorageS3> {
   }
 }
 
-function etcdLoader (): typeof StorageEtcd {
-  const m = require('./etcd')
-  if (m) {
-    return m
+async function etcdLoader (): Promise<typeof StorageEtcd > {
+  try {
+    const m = await import('./etcd.js')
+    return m.default
+  } catch (e) {
+    console.error(e)
+    throw new Error('Load Etcd Storage failed: have you installed the "etcd3" NPM module?')
   }
-  throw new Error('Load Etcd Storage failed: have you installed the "etcd3" NPM module?')
 }
 
 export const BACKEND_FACTORY_DICT = {

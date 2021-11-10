@@ -1,24 +1,21 @@
-import type { Etcd3 } from 'etcd3'
+import { Etcd3 } from 'etcd3'
 
 import {
   log,
-}                     from '../config'
-import {
+}                     from '../config.js'
+import type {
   MemoryCardPayload,
-}                     from '../types'
+}                     from '../types.js'
 
 import {
   StorageBackend,
-}                         from './backend'
-import {
+}                         from './backend.js'
+import type {
   StorageBackendOptions,
   StorageEtcdOptions,
-}                         from './backend-config'
+}                         from './backend-config.js'
 
-const Etcd3Module: { Etcd3: typeof Etcd3 } = require('etcd3')
-const Etcd3Ctor = Etcd3Module.Etcd3
-
-export class StorageEtcd extends StorageBackend {
+class StorageEtcd extends StorageBackend {
 
   private etcd: Etcd3
 
@@ -32,12 +29,12 @@ export class StorageEtcd extends StorageBackend {
     super(name, options)
     options = options as StorageEtcdOptions
 
-    this.etcd = new Etcd3Ctor({
+    this.etcd = new Etcd3({
       hosts: options.hosts,
     })
   }
 
-  public toString (): string {
+  override toString (): string {
     const text = [
       this.constructor.name,
       '<',
@@ -53,7 +50,7 @@ export class StorageEtcd extends StorageBackend {
     await this.etcd
       .put(this.name)
       .value(
-        JSON.stringify(payload)
+        JSON.stringify(payload),
       )
   }
 
@@ -68,7 +65,7 @@ export class StorageEtcd extends StorageBackend {
 
     try {
       return JSON.parse(result)
-    } catch (e) {
+    } catch (e: any) {
       log.warn('StorageEtcd', 'load() rejection: %s', e && e.message)
       console.error(e)
       return {}
@@ -82,4 +79,9 @@ export class StorageEtcd extends StorageBackend {
     await this.etcd.delete().key(this.name)
   }
 
+}
+
+export default StorageEtcd
+export {
+  StorageEtcd,
 }

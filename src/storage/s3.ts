@@ -1,4 +1,4 @@
-import { S3 } from 'aws-sdk'
+import AWS_SDK from 'aws-sdk'
 import {
   log,
 }                     from '../config.js'
@@ -13,6 +13,8 @@ import type {
   StorageBackendOptions,
   StorageS3Options,
 }                         from './backend-config.js'
+
+const { S3 } = AWS_SDK
 
 class StorageS3 extends StorageBackend {
 
