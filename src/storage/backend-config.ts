@@ -1,3 +1,4 @@
+import { StorageEtcd }  from './etcd.js'
 import { StorageFile }  from './file.js'
 import { StorageNop }   from './nop.js'
 import type { StorageObs }   from './obs.js'
@@ -25,6 +26,19 @@ export interface StorageObsOptions {
   bucket : string,
 }
 
+export interface StorageEtcdOptions {
+  hosts: string[] | string;
+  auth?: {
+    username: string
+    password: string
+  }
+  credentials?: {
+    rootCertificate : Buffer
+    privateKey?     : Buffer
+    certChain?      : Buffer
+  }
+}
+
 async function obsLoader (): Promise<typeof StorageObs> {
   try {
     const m = await import('./obs.js')
@@ -45,7 +59,16 @@ async function s3Loader (): Promise<typeof StorageS3> {
   }
 }
 
+function etcdLoader (): typeof StorageEtcd {
+  const m = require('./etcd')
+  if (m) {
+    return m
+  }
+  throw new Error('Load Etcd Storage failed: have you installed the "etcd3" NPM module?')
+}
+
 export const BACKEND_FACTORY_DICT = {
+  etcd : etcdLoader,
   file : async () => Promise.resolve(StorageFile),
   nop  : async () => Promise.resolve(StorageNop),
   obs  : obsLoader,
@@ -59,3 +82,4 @@ export type StorageBackendOptions =
   | ({ type?: 'nop' }   & StorageNopOptions)
   | ({ type?: 's3' }    & StorageS3Options)
   | ({ type?: 'obs' }   & StorageObsOptions)
+  | ({ type?: 'etcd' }  & StorageEtcdOptions)

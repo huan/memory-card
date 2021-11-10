@@ -20,6 +20,8 @@ jobs:
 
       - name: Install Dependencies
         run: npm install
+      - name: Start Etcd Server
+        run: ./scripts/docker-etcd.sh start
 
       - name: Test
         run: npm test
@@ -28,6 +30,9 @@ jobs:
           AWS_S3_BUCKET         : ${{ secrets.AWS_S3_BUCKET }}
           AWS_REGION            : ${{ secrets.AWS_REGION }}
           AWS_SECRET_ACCESS_KEY : ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Stop Etcd Server
+        run: ./scripts/docker-etcd.sh stop
 
   pack:
     name: Pack
@@ -49,7 +54,7 @@ jobs:
         run: ./scripts/npm-pack-testing.sh
 
   publish:
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/v'))
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/v'))
     name: Publish
     needs: [build, pack]
     runs-on: ubuntu-latest
@@ -75,7 +80,7 @@ jobs:
       - name: Check Branch
         id: check-branch
         run: |
-          if [[ ${{ github.ref }} =~ ^refs/heads/(master|v[0-9]+\.[0-9]+.*)$ ]]; then
+          if [[ ${{ github.ref }} =~ ^refs/heads/(main|v[0-9]+\.[0-9]+.*)$ ]]; then
               echo ::set-output name=match::true
           fi  # See: https://stackoverflow.com/a/58869470/1123955
       - name: Is A Publish Branch

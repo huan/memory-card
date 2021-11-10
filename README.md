@@ -61,6 +61,7 @@ export class MemoryCard implements AsyncMapLike { ... }
 ### v0.13 (Aug, 2021)
 
 1. Move S3 & OBS to peer dependency to reduce install size
+1. Add Etcd Storage support
 
 ### v0.6 master (Aug 2018)
 
