@@ -1,9 +1,9 @@
-export {
+export type {
   StorageBackendOptions,
-}                         from './backend-config'
+}                         from './backend-config.js'
 export {
   StorageBackend,
-}                         from './backend'
+}                         from './backend.js'
 export {
   getStorage,
-}                         from './get-storage'
+}                         from './get-storage.js'

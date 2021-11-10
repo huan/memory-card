@@ -1,19 +1,18 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 
-// tslint:disable:no-shadowed-variable
-import test from 'blue-tape'
+import { test } from 'tstest'
 
 import {
   AWS_SETTING,
   OBS_SETTING,
-}                 from '../tests/fixtures'
+}                 from '../tests/fixtures.js'
 
 import {
   MemoryCard,
-}                           from './memory-card'
-import {
+}                           from './memory-card.js'
+import type {
   StorageBackendOptions,
-}                           from './storage/mod'
+}                           from './storage/mod.js'
 
 test('smoke testing', async t => {
   const card = new MemoryCard()
@@ -62,7 +61,7 @@ test('storage file load/save', async t => {
 
 test('storage aws s3 load/save', async t => {
   if (!AWS_SETTING) {
-    t.skip('AWS S3 environment variable not found.')
+    await t.skip('AWS S3 environment variable not found.')
     return
   }
 

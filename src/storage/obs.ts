@@ -1,19 +1,20 @@
+/// <reference path="./types.d.ts" />
+import ObsClient from 'esdk-obs-nodejs'
+
 import {
   log,
-}                     from '../config'
-import {
+}                     from '../config.js'
+import type {
   MemoryCardPayload,
-}                     from '../types'
+}                     from '../types.js'
 
 import {
   StorageBackend,
-}                         from './backend'
-import {
+}                         from './backend.js'
+import type {
   StorageBackendOptions,
   StorageObsOptions,
-}                         from './backend-config'
-// tslint:disable-next-line:no-var-requires
-const ObsClient = require('esdk-obs-nodejs')
+}                         from './backend-config.js'
 
 class StorageObs extends StorageBackend {
 
@@ -36,7 +37,7 @@ class StorageObs extends StorageBackend {
     })
   }
 
-  public toString (): string {
+  override toString (): string {
     const text = [
       this.constructor.name,
       '<',
@@ -89,7 +90,7 @@ class StorageObs extends StorageBackend {
         Body        : JSON.stringify(payload),
         Bucket      : options.bucket,
         Key         : this.name,
-      }, (err: Error, result: {
+      }, (err: null | Error, result: {
         CommonMsg: {
           Status      : number,
           Code        : string,
@@ -125,7 +126,7 @@ class StorageObs extends StorageBackend {
       this.obs.getObject({
         Bucket: options.bucket,
         Key: this.name,
-      }, (err: Error, result: {
+      }, (err: null | Error, result: {
         CommonMsg: {
           Status        : number,
           Code          : string,
@@ -133,7 +134,7 @@ class StorageObs extends StorageBackend {
           HostId        : string,
           RequestId     : string,
         },
-        InterfaceResult: {
+        InterfaceResult?: {
           ContentLength   : string,
           Date            : Date,
           RequestId       : string,
@@ -167,7 +168,7 @@ class StorageObs extends StorageBackend {
       this.obs.putObject({
         Bucket: options.bucket,
         Key: this.name,
-      }, (err: Error, result: {
+      }, (err: null | Error, result: {
         CommonMsg: {
           Status    : number,
           Code      : string,

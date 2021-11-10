@@ -3,18 +3,18 @@ import path from 'path'
 
 import {
   log,
-}                     from '../config'
-import {
+}                     from '../config.js'
+import type {
   MemoryCardPayload,
-}                     from '../types'
+}                     from '../types.js'
 
 import {
   StorageBackend,
-}                         from './backend'
-import {
+}                         from './backend.js'
+import type {
   StorageBackendOptions,
   StorageFileOptions,
-}                         from './backend-config'
+}                         from './backend-config.js'
 
 class StorageFile extends StorageBackend {
 
@@ -42,7 +42,7 @@ class StorageFile extends StorageBackend {
     }
   }
 
-  public toString (): string {
+  override toString (): string {
     const text = [
       this.constructor.name,
       '<',

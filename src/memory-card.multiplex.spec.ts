@@ -1,14 +1,15 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 
-// tslint:disable:no-shadowed-variable
-import test   from 'blue-tape'
-import sinon  from 'sinon'
+import {
+  test,
+  sinon,
+}           from 'tstest'
 
 import {
   MemoryCard,
   NAMESPACE_KEY_SEPRATOR,
   NAMESPACE_MULTIPLEX_SEPRATOR,
-}                                 from './memory-card'
+}                                 from './memory-card.js'
 // import { MemoryCardPayload }      from './types'
 
 class MemoryCardTest extends MemoryCard {
@@ -21,15 +22,15 @@ class MemoryCardTest extends MemoryCard {
   //   super.payload = data
   // }
 
-  public resolveKey (key: string): string {
+  override resolveKey (key: string): string {
     return super.resolveKey(key)
   }
 
-  public multiplexPath (): string {
+  override multiplexPath (): string {
     return super.multiplexPath()
   }
 
-  public isMultiplexKey (key: string): boolean {
+  override isMultiplexKey (key: string): boolean {
     return super.isMultiplexKey(key)
   }
 

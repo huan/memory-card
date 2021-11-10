@@ -1,16 +1,16 @@
 import {
   log,
-}                     from '../config'
-import {
+}                     from '../config.js'
+import type {
   MemoryCardPayload,
-}                     from '../types'
+}                     from '../types.js'
 
 import {
   StorageBackend,
-}                         from './backend'
-import {
+}                         from './backend.js'
+import type {
   StorageBackendOptions,
-}                         from './backend-config'
+}                         from './backend-config.js'
 
 class StorageNop extends StorageBackend {
 
@@ -22,7 +22,7 @@ class StorageNop extends StorageBackend {
     super(name, options)
   }
 
-  public toString (): string {
+  override toString (): string {
     const text = [
       this.constructor.name,
       '<nop>',

@@ -1,4 +1,4 @@
-import { StorageBackendOptions } from '../src/storage/backend-config'
+import type { StorageBackendOptions } from '../src/storage/backend-config.js'
 
 /**
  * S3 Key for Unit Testing

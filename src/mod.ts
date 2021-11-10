@@ -1,11 +1,11 @@
 import {
   MemoryCard,
-}               from './memory-card'
+}               from './memory-card.js'
 
 import {
   log,
   VERSION,
-}               from './config'
+}               from './config.js'
 
 export {
   MemoryCard,
