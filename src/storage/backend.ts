@@ -1,13 +1,13 @@
 import {
   log,
-}                         from '../config'
-import {
+}                         from '../config.js'
+import type {
   MemoryCardPayload,
-}                         from '../types'
+}                         from '../types.js'
 
-import {
+import type {
   StorageBackendOptions,
-}                         from './backend-config'
+}                         from './backend-config.js'
 
 export abstract class StorageBackend {
 

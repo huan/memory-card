@@ -1,16 +1,16 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 
-import test from 'blue-tape'
+import { test } from 'tstest'
 
 import {
   AWS_SETTING,
-}                 from '../../tests/fixtures'
+}                 from '../../tests/fixtures.js'
 
-import { StorageS3 } from './s3'
+import { StorageS3 } from './s3.js'
 
 test('amazon s3 storage smoke testing', async t => {
   if (!AWS_SETTING) {
-    t.skip('AWS S3 environment variables not set.')
+    await t.skip('AWS S3 environment variables not set.')
     return
   }
 

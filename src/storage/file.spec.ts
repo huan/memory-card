@@ -1,8 +1,8 @@
 #!/usr/bin/env ts-node
 
-import test from 'blue-tape'
+import { test } from 'tstest'
 
-import { StorageFile } from './file'
+import { StorageFile } from './file.js'
 
 test('smoke testing', async t => {
   const EXPECTED_PAYLOAD = { mol: 42 }

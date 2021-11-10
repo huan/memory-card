@@ -1,11 +1,10 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 
-// tslint:disable:no-shadowed-variable
-import test from 'blue-tape'
+import { test } from 'tstest'
 
 import {
   MemoryCard,
-}               from '../src/memory-card'
+}               from '../src/memory-card.js'
 
 test('integrate testing', async t => {
   const card = new MemoryCard()

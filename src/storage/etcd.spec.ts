@@ -1,8 +1,8 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 
-import test from 'blue-tape'
+import { test } from 'tstest'
 
-import { StorageEtcd } from './etcd'
+import { StorageEtcd } from './etcd.js'
 
 test('etcd storage smoke testing', async t => {
   const EXPECTED_PAYLOAD = { mol: 42 }
@@ -12,19 +12,19 @@ test('etcd storage smoke testing', async t => {
     NAME,
     {
       hosts: '127.0.0.1:2379',
-    }
+    },
   )
 
   let empty = await etcd.load()
-  t.deepEqual(empty, {}, 'should get back a empty object for non-exist data')
+  t.same(empty, {}, 'should get back a empty object for non-exist data')
 
   await etcd.save(EXPECTED_PAYLOAD)
   const payload = await etcd.load()
 
-  t.deepEqual(payload, EXPECTED_PAYLOAD, 'should get back data from s3')
+  t.same(payload, EXPECTED_PAYLOAD, 'should get back data from s3')
 
   await etcd.destroy()
 
   empty = await etcd.load()
-  t.deepEqual(empty, {}, 'should get back a empty object after destroy()')
+  t.same(empty, {}, 'should get back a empty object after destroy()')
 })

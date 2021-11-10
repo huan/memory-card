@@ -1,25 +1,24 @@
-import type S3 from 'aws-sdk/clients/s3'
-
+import AWS_SDK from 'aws-sdk'
 import {
   log,
-}                     from '../config'
-import {
+}                     from '../config.js'
+import type {
   MemoryCardPayload,
-}                     from '../types'
+}                     from '../types.js'
 
 import {
   StorageBackend,
-}                         from './backend'
-import {
+}                         from './backend.js'
+import type {
   StorageBackendOptions,
   StorageS3Options,
-}                         from './backend-config'
+}                         from './backend-config.js'
 
-const S3Ctor: typeof S3 = require('aws-sdk/clients/s3')
+const { S3 } = AWS_SDK
 
 class StorageS3 extends StorageBackend {
 
-  private s3: S3
+  private s3: InstanceType<typeof S3>
 
   constructor (
     name    : string,
@@ -31,7 +30,7 @@ class StorageS3 extends StorageBackend {
     super(name, options)
     options = options as StorageS3Options
 
-    this.s3 = new S3Ctor({
+    this.s3 = new S3({
       credentials: {
         accessKeyId     : options.accessKeyId,
         secretAccessKey : options.secretAccessKey,
@@ -40,7 +39,7 @@ class StorageS3 extends StorageBackend {
     })
   }
 
-  public toString (): string {
+  override toString (): string {
     const text = [
       this.constructor.name,
       '<',
@@ -73,13 +72,13 @@ class StorageS3 extends StorageBackend {
         Key    : this.name,
       }).promise()
 
-      if (!result || !result.Body) {
+      if (!result.Body) {
         return {}
       }
 
       return JSON.parse(result.Body.toString())
 
-    } catch (e) {
+    } catch (e: any) {
       if (/^4/.test(e.statusCode)) {
         return {}
       }

@@ -18,7 +18,7 @@ Memory Card is an Easy to Use Key/Value Store, with Swagger API Backend &amp; Se
 /**
  * ES6 Map like Async API
  */
-export interface AsyncMap<K = any, V = any> {
+export interface AsyncMapLike<K = any, V = any> {
   size: Promise<number>
 
   [Symbol.asyncIterator](): AsyncIterableIterator<[K, V]>
@@ -33,8 +33,10 @@ export interface AsyncMap<K = any, V = any> {
   clear   ()                 : Promise<void>
 }
 
-export class MemoryCard implements AsyncMap { ... }
+export class MemoryCard implements AsyncMapLike { ... }
 ```
+
+> `MemoryCard` is an [AsyncMapLike](https://github.com/huan/async-map-like) interface
 
 ### 1. load()
 
@@ -51,7 +53,12 @@ export class MemoryCard implements AsyncMap { ... }
 
 ## CHANGELOG
 
-### master v0.13
+### master v1.0 (Nov 10, 2021)
+
+1. Release v1.0
+1. ES Module support
+
+### v0.13 (Aug, 2021)
 
 1. Move S3 & OBS to peer dependency to reduce install size
 1. Add Etcd Storage support

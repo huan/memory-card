@@ -1,11 +1,18 @@
 {
   "name": "memory-card",
-  "version": "0.13.5",
+  "version": "1.0.2",
   "description": "ES6 Map like Async API, with Swagger API Backend Support.",
-  "main": "dist/src/mod.js",
-  "typings": "dist/src/mod.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/src/mod.js",
+      "require": "./dist/cjs/src/mod.js"
+    }
+  },
+  "typings": "./dist/esm/src/mod.d.ts",
   "engines": {
-    "node": ">= 10"
+    "node": ">=16",
+    "npm": ">=7"
   },
   "directories": {
     "doc": "docs",
@@ -13,12 +20,13 @@
   },
   "scripts": {
     "clean": "shx rm -fr dist/*",
-    "dist": "npm run clean && tsc",
-    "pack": "npm pack",
-    "lint": "npm run lint:es && npm run lint:ts",
-    "lint:ts": "tsc --noEmit",
-    "test": "npm run lint && npm run test:unit",
-    "test:unit": "blue-tape -r ts-node/register \"src/**/*.spec.ts\" \"tests/**/*.spec.ts\"",
+    "dist": "npm-run-all clean build dist:commonjs",
+    "build": "tsc && tsc -p tsconfig.cjs.json",
+    "dist:commonjs": "jq -n \"{ type: \\\"commonjs\\\" }\" > dist/cjs/package.json",
+    "lint": "npm-run-all lint:es lint:ts",
+    "lint:ts": "tsc --isolatedModules --noEmit",
+    "test": "npm-run-all lint test:unit",
+    "test:unit": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" tap \"src/**/*.spec.ts\" \"tests/**/*.spec.ts\"",
     "test:pack": "bash -x scripts/npm-pack-testing.sh",
     "lint:es": "eslint --ignore-pattern tests/fixtures/ '{bin,examples,scripts,src,tests}/**/*.ts'"
   },
@@ -42,16 +50,16 @@
   },
   "homepage": "https://github.com/huan/memory-card#readme",
   "devDependencies": {
-    "@chatie/eslint-config": "^0.14.1",
+    "@chatie/eslint-config": "^1.0.4",
     "@chatie/git-scripts": "^0.6.2",
     "@chatie/semver": "^0.4.7",
-    "@chatie/tsconfig": "^0.20.2",
-    "aws-sdk": ">=2.958.0",
+    "@chatie/tsconfig": "^1.0.3",
+    "aws-sdk": ">=2.1025.0",
     "esdk-obs-nodejs": ">=3.21.6",
     "etcd3": "^1.1.0",
     "pkg-jq": "^0.2.11",
     "shx": "^0.3.3",
-    "tstest": "^0.4.10"
+    "tstest": "^1.0.1"
   },
   "publishConfig": {
     "access": "public",
@@ -62,6 +70,10 @@
     "async-map-like": "^0.2.5",
     "brolog": "^1.12.4"
   },
+  "files": [
+    "dist",
+    "src"
+  ],
   "git": {
     "scripts": {
       "pre-push": "npx git-scripts-pre-push"

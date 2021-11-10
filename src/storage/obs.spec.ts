@@ -1,10 +1,10 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env -S node --no-warnings --loader ts-node/esm
 
-import test from 'blue-tape'
+import { test } from 'tstest'
 
-import { StorageObs } from './obs'
+import { StorageObs } from './obs.js'
 
-import { OBS_SETTING } from '../../tests/fixtures'
+import { OBS_SETTING } from '../../tests/fixtures.js'
 
 test.skip('huawei obs storage smoke testing', async t => {
   const EXPECTED_PAYLOAD = { mol: 42 }
@@ -21,15 +21,15 @@ test.skip('huawei obs storage smoke testing', async t => {
   )
 
   let empty = await s3.load()
-  t.deepEqual(empty, {}, 'should get back a empty object for non-exist data')
+  t.same(empty, {}, 'should get back a empty object for non-exist data')
 
   await s3.save(EXPECTED_PAYLOAD)
   const payload = await s3.load()
 
-  t.deepEqual(payload, EXPECTED_PAYLOAD, 'should get back data from obs')
+  t.same(payload, EXPECTED_PAYLOAD, 'should get back data from obs')
 
   await s3.destroy()
 
   empty = await s3.load()
-  t.deepEqual(empty, {}, 'should get back a empty object after destroy()')
+  t.same(empty, {}, 'should get back a empty object after destroy()')
 })

@@ -1,22 +1,22 @@
 import {
   log,
-}                         from '../config'
+}                         from '../config.js'
 
 import {
   BACKEND_FACTORY_DICT,
   StorageBackendOptions,
-}                         from './backend-config'
+}                         from './backend-config.js'
 
-import {
+import type {
   StorageBackend,
-}                         from './backend'
+}                         from './backend.js'
 
-export function getStorage (
+async function getStorage (
   name?   : string,
   options : StorageBackendOptions = {
     type: 'file',
-  }
-): StorageBackend {
+  },
+): Promise<StorageBackend> {
   log.verbose('getStorage', 'name: %s, options: %s', name, JSON.stringify(options))
 
   if (!name) {
@@ -30,7 +30,9 @@ export function getStorage (
     throw new Error('backend unknown: ' + options.type)
   }
 
-  const Backend = BACKEND_FACTORY_DICT[options.type]()
+  const Backend = await BACKEND_FACTORY_DICT[options.type]()
   const backend = new Backend(name, options)
   return backend
 }
+
+export { getStorage }

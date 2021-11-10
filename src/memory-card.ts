@@ -1,21 +1,18 @@
-// https://github.com/Microsoft/TypeScript/issues/14151#issuecomment-280812617
-// if (!Symbol.asyncIterator) {
-//   (<any>Symbol).asyncIterator =  Symbol.for('Symbol.asyncIterator')
-// }
-import { AsyncMapLike } from 'async-map-like'
+/* eslint-disable no-use-before-define */
+import type { AsyncMapLike } from 'async-map-like'
 
 import {
   log,
   VERSION,
-}                       from './config'
+}                       from './config.js'
 import {
   getStorage,
   StorageBackend,
   StorageBackendOptions,
-}                         from './storage/mod'
-import {
+}                         from './storage/mod.js'
+import type {
   MemoryCardPayload,
-}                       from './types'
+}                       from './types.js'
 
 export const NAMESPACE_MULTIPLEX_SEPRATOR = '\r'
 export const NAMESPACE_KEY_SEPRATOR       = '\n'
@@ -49,8 +46,8 @@ export class MemoryCard implements AsyncMapLike<any, any> {
    */
   static VERSION = VERSION
 
-  fromJSON (textOrObj: string | MemoryCardJsonObject): MemoryCard {
-    log.verbose('MemoryCard', 'fromJSON(...)')
+  static fromJSON (textOrObj: string | MemoryCardJsonObject): AsyncMapLike<any, any> {
+    log.verbose('MemoryCard', 'static fromJSON(...)')
 
     let jsonObj: MemoryCardJsonObject
 
@@ -60,7 +57,7 @@ export class MemoryCard implements AsyncMapLike<any, any> {
       jsonObj = textOrObj
     }
 
-    const card = new MemoryCard(jsonObj.options)
+    const card = new this(jsonObj.options)
     card.payload = jsonObj.payload
 
     return card
@@ -77,14 +74,14 @@ export class MemoryCard implements AsyncMapLike<any, any> {
     //   throw new Error('can not multiplex a un-named MemoryCard')
     // }
 
-    const mpMemory = new this({
+    const subMemory = new this({
       ...memory.options,
       multiplex: {
         name,
         parent: memory,
       },
     })
-    return mpMemory
+    return subMemory
   }
 
   /**
@@ -124,13 +121,11 @@ export class MemoryCard implements AsyncMapLike<any, any> {
         ...this.parent.multiplexNameList,
         options.multiplex.name,
       ]
-      this.storage = undefined
     } else {
       // payload should be undefined before load()
-      this.payload           = undefined
+      this.payload = undefined
 
       this.multiplexNameList = []
-      this.storage           = this.getStorage()
     }
   }
 
@@ -142,18 +137,14 @@ export class MemoryCard implements AsyncMapLike<any, any> {
         .join('')
     }
 
-    const name = this.options && this.options.name
-      ? this.options.name.toString()
-      : ''
-
-    return `MemoryCard<${name}>${mpString}`
+    return `MemoryCard<${this.options?.name ?? ''}>${mpString}`
   }
 
   version (): string {
     return VERSION
   }
 
-  private getStorage (): undefined | StorageBackend {
+  private async getStorage (): Promise<undefined | StorageBackend> {
     log.verbose('MemoryCard', 'getStorage() for storage type: %s',
       (this.options
         && this.options.storageOptions
@@ -165,7 +156,7 @@ export class MemoryCard implements AsyncMapLike<any, any> {
       return
     }
 
-    const storage = getStorage(
+    const storage = await getStorage(
       this.options.name,
       this.options.storageOptions,
     )
@@ -184,6 +175,10 @@ export class MemoryCard implements AsyncMapLike<any, any> {
       throw new Error('memory had already loaded before.')
     }
 
+    if (!this.storage) {
+      this.storage = await this.getStorage()
+    }
+
     if (this.storage) {
       this.payload = await this.storage.load()
     } else {
@@ -193,6 +188,8 @@ export class MemoryCard implements AsyncMapLike<any, any> {
   }
 
   async save (): Promise<void> {
+    log.verbose('MemoryCard', 'save()')
+
     if (this.isMultiplex()) {
       if (!this.parent) {
         throw new Error('multiplex memory no parent')
@@ -239,7 +236,7 @@ export class MemoryCard implements AsyncMapLike<any, any> {
     }
 
     const namespace = NAMESPACE_MULTIPLEX_SEPRATOR
-                      + this.multiplexNameList.join(NAMESPACE_MULTIPLEX_SEPRATOR)
+      + this.multiplexNameList.join(NAMESPACE_MULTIPLEX_SEPRATOR)
     return namespace
   }
 
@@ -261,15 +258,6 @@ export class MemoryCard implements AsyncMapLike<any, any> {
 
   protected multiplexPath (): string {
     return this.multiplexNameList.join('/')
-  }
-
-  /**
-   * @deprecated use multiplex() instead
-   * @hidden
-   */
-  sub (name: string): this {
-    log.warn('MemoryCard', 'sub() DEPRECATED, use multiplex() instead')
-    return this.multiplex(name)
   }
 
   multiplex (name: string): this {
