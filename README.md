@@ -53,7 +53,11 @@ export class MemoryCard implements AsyncMapLike { ... }
 
 ## CHANGELOG
 
-### master v1.0 (Nov 10, 2021)
+### master v1.1 (Nov 27, 2021)
+
+1. Fix [#39](https://github.com/huan/memory-card/issues/39) by update [AsyncMapLike](https://github.com/huan/async-map-like) to v1.0
+
+### v1.0 (Nov 10, 2021)
 
 1. Release v1.0
 1. ES Module support
