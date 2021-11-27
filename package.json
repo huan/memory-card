@@ -1,6 +1,6 @@
 {
   "name": "memory-card",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "ES6 Map like Async API, with Swagger API Backend Support.",
   "type": "module",
   "exports": {
