@@ -21,8 +21,8 @@ function start () {
   echo "Starting etcd server..."
   docker run -d --rm --name etcd-server \
       --network bridge \
-      --publish 2379:2379 \
-      --publish 2380:2380 \
+      --publish 127.0.0.1:23790:2379 \
+      --publish 127.0.0.1:23800:2380 \
       --env ALLOW_NONE_AUTHENTICATION=yes \
       --env ETCD_ADVERTISE_CLIENT_URLS=http://etcd-server:2379 \
       bitnami/etcd:latest

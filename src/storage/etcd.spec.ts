@@ -11,7 +11,7 @@ test('etcd storage smoke testing', async t => {
   const etcd = new StorageEtcd(
     NAME,
     {
-      hosts: '127.0.0.1:2379',
+      hosts: '127.0.0.1:23790',
     },
   )
 
