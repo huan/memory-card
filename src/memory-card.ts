@@ -360,8 +360,8 @@ export class MemoryCard implements AsyncMapLike<any, any> {
     }
 
     for await (const relativeKey of this.keys()) {
-      const absoluteKey       = this.resolveKey(relativeKey)
-      const data: T           = this.payload[absoluteKey] as any
+      const absoluteKey = this.resolveKey(relativeKey)
+      const data: T     = this.payload[absoluteKey] as any
 
       const pair: [string, T] = [relativeKey, data]
       yield pair
@@ -461,13 +461,6 @@ export class MemoryCard implements AsyncMapLike<any, any> {
       callbackfn.call(thisArg, value, key, this)
     }
   }
-
-  /**
-   * Huan(202108): FIXME
-   *  I totally forget what are the following two methods are...
-   */
-  [Symbol.iterator] () : AsyncIterableIterator<[string, number]> { return {} as any }
-  get [Symbol.toStringTag] () { return Promise.resolve('MemoryCardStringTag') }
 
   /**
    *

@@ -1,6 +1,6 @@
 {
   "name": "memory-card",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "ES6 Map like Async API, with Swagger API Backend Support.",
   "type": "module",
   "exports": {
@@ -53,8 +53,8 @@
     "@chatie/eslint-config": "^1.0.4",
     "@chatie/git-scripts": "^0.6.2",
     "@chatie/semver": "^0.4.7",
-    "@chatie/tsconfig": "^1.0.3",
-    "aws-sdk": ">=2.1025.0",
+    "@chatie/tsconfig": "^4.5.3",
+    "aws-sdk": ">=2.1037.0",
     "esdk-obs-nodejs": ">=3.21.6",
     "etcd3": "^1.1.0",
     "pkg-jq": "^0.2.11",
@@ -67,8 +67,8 @@
   },
   "peerDependencies": {},
   "dependencies": {
-    "async-map-like": "^0.2.5",
-    "brolog": "^1.12.4"
+    "async-map-like": "^1.0.2",
+    "brolog": "^1.14.2"
   },
   "files": [
     "dist",
