@@ -11,7 +11,7 @@ async function main () {
     await card.set('a', 'b')
     await card.get('a')
 
-    if (VERSION === '0.0.0') {
+    if (card.version() === '0.0.0') {
       throw new Error('version not set right before publish!')
     }
 

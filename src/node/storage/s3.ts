@@ -1,24 +1,26 @@
+/// <reference path="./types.d.ts" />
 import AWS_SDK from 'aws-sdk'
+
 import {
   log,
-}                     from '../config.js'
+}                     from '../../config.ts'
 import type {
   MemoryCardPayload,
-}                     from '../types.js'
+}                     from '../../types.ts'
 
 import {
   StorageBackend,
-}                         from './backend.js'
+}                         from '../../storage/backend.ts'
 import type {
   StorageBackendOptions,
   StorageS3Options,
-}                         from './backend-config.js'
+}                         from '../../storage/backend-config.ts'
 
 const { S3 } = AWS_SDK
 
-class StorageS3 extends StorageBackend {
+export class StorageS3 extends StorageBackend {
 
-  private s3: InstanceType<typeof S3>
+  private s3: any
 
   constructor (
     name    : string,
@@ -28,14 +30,14 @@ class StorageS3 extends StorageBackend {
 
     options.type = 's3'
     super(name, options)
-    options = options as StorageS3Options
+    const s3Options = options as StorageS3Options
 
     this.s3 = new S3({
       credentials: {
-        accessKeyId     : options.accessKeyId,
-        secretAccessKey : options.secretAccessKey,
+        accessKeyId     : s3Options.accessKeyId,
+        secretAccessKey : s3Options.secretAccessKey,
       },
-      region: options.region,
+      region: s3Options.region,
     })
   }
 
@@ -101,6 +103,3 @@ class StorageS3 extends StorageBackend {
 }
 
 export default StorageS3
-export {
-  StorageS3,
-}

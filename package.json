@@ -1,34 +1,46 @@
 {
   "name": "memory-card",
-  "version": "1.1.2",
-  "description": "ES6 Map like Async API, with Swagger API Backend Support.",
+  "version": "2.0.0",
+  "description": "ES6 Map like Async API, with Multi-Backend Support for Web and Node.js.",
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/esm/src/mod.js",
-      "require": "./dist/cjs/src/mod.js"
+      "types": "./dist/esm/src/mod.d.ts",
+      "browser": "./dist/esm/src/mod.js",
+      "node": "./dist/esm/src/node/mod.js",
+      "default": "./dist/esm/src/mod.js"
+    },
+    "./browser": {
+      "types": "./dist/esm/src/mod.d.ts",
+      "default": "./dist/esm/src/mod.js"
+    },
+    "./node": {
+      "types": "./dist/esm/src/mod.d.ts",
+      "default": "./dist/esm/src/node/mod.js"
     }
   },
-  "typings": "./dist/esm/src/mod.d.ts",
+  "types": "./dist/esm/src/mod.d.ts",
   "engines": {
-    "node": ">=16",
-    "npm": ">=7"
-  },
-  "directories": {
-    "doc": "docs",
-    "test": "tests"
+    "node": ">=26",
+    "npm": ">=10"
   },
   "scripts": {
+    "build": "tsc",
     "clean": "shx rm -fr dist/*",
-    "dist": "npm-run-all clean build dist:commonjs",
-    "build": "tsc && tsc -p tsconfig.cjs.json",
-    "dist:commonjs": "jq -n \"{ type: \\\"commonjs\\\" }\" > dist/cjs/package.json",
-    "lint": "npm-run-all lint:es lint:ts",
+    "dist": "npm run clean && npm run build",
+    "lint": "npm run lint:biome && npm run lint:ts",
+    "lint:biome": "biome lint src tests scripts",
     "lint:ts": "tsc --isolatedModules --noEmit",
-    "test": "npm-run-all lint test:unit",
-    "test:unit": "cross-env NODE_OPTIONS=\"--no-warnings --loader=ts-node/esm\" tap \"src/**/*.spec.ts\" \"tests/**/*.spec.ts\"",
+    "test": "npm run lint && npm run test:unit && npm run test:unit:web",
+    "test:unit": "node --test src tests/resolution-matrix.native.test.ts",
+    "test:unit:web": "node --conditions=browser --test src/memory-card.test.ts src/memory-card.unsupported.test.ts",
+    "test:unit:deno": "deno test --no-check --allow-read=.,/tmp --allow-write=/tmp --allow-env src",
+    "test:unit:browser": "wtr --config web-test-runner.config.js",
+    "test:browser": "npm run test:unit:browser",
     "test:pack": "bash -x scripts/npm-pack-testing.sh",
-    "lint:es": "eslint --ignore-pattern tests/fixtures/ '{bin,examples,scripts,src,tests}/**/*.ts'"
+    "coverage": "npm run coverage:unit && npm run coverage:browser",
+    "coverage:unit": "node --test --experimental-test-coverage src tests/resolution-matrix.native.test.ts",
+    "coverage:browser": "wtr --config web-test-runner.config.js --coverage"
   },
   "repository": {
     "type": "git",
@@ -37,11 +49,12 @@
   "keywords": [
     "async",
     "map",
-    "swagger",
-    "openapi",
     "key",
     "value",
-    "store"
+    "store",
+    "wintertc",
+    "browser",
+    "localstorage"
   ],
   "author": "Huan LI <zixia@zixia.net>",
   "license": "Apache-2.0",
@@ -49,34 +62,35 @@
     "url": "https://github.com/huan/memory-card/issues"
   },
   "homepage": "https://github.com/huan/memory-card#readme",
-  "devDependencies": {
-    "@chatie/eslint-config": "^1.0.4",
-    "@chatie/git-scripts": "^0.6.2",
-    "@chatie/semver": "^0.4.7",
-    "@chatie/tsconfig": "^4.5.3",
-    "aws-sdk": ">=2.1037.0",
-    "esdk-obs-nodejs": ">=3.21.6",
-    "etcd3": "^1.1.0",
-    "pkg-jq": "^0.2.11",
-    "shx": "^0.3.3",
-    "tstest": "^1.0.1"
-  },
-  "publishConfig": {
-    "access": "public",
-    "tag": "next"
-  },
-  "peerDependencies": {},
   "dependencies": {
     "async-map-like": "^1.0.2",
-    "brolog": "^1.14.2"
+    "brolog": "^2.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.5",
+    "@types/chai": "^5.2.3",
+    "@types/node": "^26.0.0",
+    "@web/dev-server-esbuild": "^2.0.1",
+    "@web/test-runner": "^1.0.1",
+    "@web/test-runner-playwright": "^1.0.2",
+    "chai": "^6.3.0",
+    "esbuild": "^0.28.2",
+    "playwright": "^1.65.1",
+    "shx": "^0.3.4",
+    "typescript": "^5.8.0"
+  },
+  "imports": {
+    "#memory-card": {
+      "browser": "./src/mod.ts",
+      "default": "./src/node/mod.ts"
+    }
   },
   "files": [
     "dist",
     "src"
   ],
-  "git": {
-    "scripts": {
-      "pre-push": "npx git-scripts-pre-push"
-    }
+  "publishConfig": {
+    "access": "public",
+    "tag": "next"
   }
 }

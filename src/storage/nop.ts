@@ -1,18 +1,18 @@
 import {
   log,
-}                     from '../config.js'
+} from '../config.ts'
 import type {
   MemoryCardPayload,
-}                     from '../types.js'
+} from '../types.ts'
 
 import {
   StorageBackend,
-}                         from './backend.js'
+} from './backend.ts'
 import type {
   StorageBackendOptions,
-}                         from './backend-config.js'
+} from './backend-config.ts'
 
-class StorageNop extends StorageBackend {
+export class StorageNop extends StorageBackend {
 
   constructor (
     name    : string,
@@ -23,11 +23,7 @@ class StorageNop extends StorageBackend {
   }
 
   override toString (): string {
-    const text = [
-      this.constructor.name,
-      '<nop>',
-    ].join('')
-    return text
+    return `${this.constructor.name}<nop>`
   }
 
   public async load (): Promise<MemoryCardPayload> {
@@ -35,7 +31,7 @@ class StorageNop extends StorageBackend {
     return {}
   }
 
-  public async save (_ /* payload */ : MemoryCardPayload): Promise<void> {
+  public async save (_payload: MemoryCardPayload): Promise<void> {
     log.verbose('StorageNop', 'save()')
   }
 
@@ -46,6 +42,3 @@ class StorageNop extends StorageBackend {
 }
 
 export default StorageNop
-export {
-  StorageNop,
-}

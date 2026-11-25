@@ -61,7 +61,6 @@ typings/
 .next
 
 /dist/
-package-lock.json
 t/
 t.*
 /*.memory-card.json

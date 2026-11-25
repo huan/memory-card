@@ -1,57 +1,58 @@
 #!/usr/bin/env bash
 set -e
 
+REPO_DIR="$(pwd)"
+
+TMPDIR=""
+cleanup() {
+  git checkout src/version.ts 2>/dev/null || true
+  if [ -n "$TMPDIR" ] && [ -d "$TMPDIR" ]; then
+    rm -rf "$TMPDIR"
+  fi
+}
+trap cleanup EXIT
+
+./scripts/generate-version.sh
+
 npm run dist
-npm pack
+TARBALL=$(npm pack | tail -n 1)
+
+git checkout src/version.ts 2>/dev/null || true
 
 TMPDIR="/tmp/npm-pack-testing.$$"
-mkdir "$TMPDIR"
-mv *-*.*.*.tgz "$TMPDIR"
+mkdir -p "$TMPDIR"
+mv "$TARBALL" "$TMPDIR"
 cp tests/fixtures/smoke-testing.ts "$TMPDIR"
 
-cd $TMPDIR
+cd "$TMPDIR"
 
 npm init -y
-npm install *-*.*.*.tgz \
-  @types/node \
-  typescript
+npm pkg set type="module"
+npm install ./"$TARBALL" @types/node typescript
 
-#
-# CommonJS
-#
 ./node_modules/.bin/tsc \
-  --esModuleInterop \
-  --lib esnext \
+  --lib esnext,dom \
+  --types node \
   --noEmitOnError \
   --noImplicitAny \
   --skipLibCheck \
-  --target es5 \
-  --module CommonJS \
-  --moduleResolution node \
-  smoke-testing.ts
-
-echo
-echo "CommonJS: pack testing..."
-node smoke-testing.js
-
-#
-# ES Modules
-#
-
-# https://stackoverflow.com/a/59203952/1123955
-echo "`jq '.type="module"' package.json`" > package.json
-
-./node_modules/.bin/tsc \
-  --esModuleInterop \
-  --lib esnext \
-  --noEmitOnError \
-  --noImplicitAny \
-  --skipLibCheck \
-  --target es2020 \
-  --module es2020 \
-  --moduleResolution node \
+  --target esnext \
+  --module NodeNext \
+  --moduleResolution NodeNext \
   smoke-testing.ts
 
 echo
 echo "ES Module: pack testing..."
 node smoke-testing.js
+
+echo
+echo "Deno: pack testing..."
+if command -v deno >/dev/null 2>&1; then
+  deno run --node-modules-dir=manual -A smoke-testing.js
+else
+  echo "deno not found, skipped"
+fi
+
+echo
+echo "Chromium: pack testing..."
+node "$REPO_DIR/scripts/npm-pack-browser-testing.ts" "$TMPDIR"

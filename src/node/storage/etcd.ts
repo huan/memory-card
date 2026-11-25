@@ -1,21 +1,22 @@
+/// <reference path="./types.d.ts" />
 import { Etcd3 } from 'etcd3'
 
 import {
   log,
-}                     from '../config.js'
+}                     from '../../config.ts'
 import type {
   MemoryCardPayload,
-}                     from '../types.js'
+}                     from '../../types.ts'
 
 import {
   StorageBackend,
-}                         from './backend.js'
+}                         from '../../storage/backend.ts'
 import type {
   StorageBackendOptions,
   StorageEtcdOptions,
-}                         from './backend-config.js'
+}                         from '../../storage/backend-config.ts'
 
-class StorageEtcd extends StorageBackend {
+export class StorageEtcd extends StorageBackend {
 
   private etcd: Etcd3
 
@@ -27,10 +28,10 @@ class StorageEtcd extends StorageBackend {
 
     options.type = 'etcd'
     super(name, options)
-    options = options as StorageEtcdOptions
+    const etcdOptions = options as StorageEtcdOptions
 
     this.etcd = new Etcd3({
-      hosts: options.hosts,
+      hosts: etcdOptions.hosts,
     })
   }
 
@@ -82,6 +83,3 @@ class StorageEtcd extends StorageBackend {
 }
 
 export default StorageEtcd
-export {
-  StorageEtcd,
-}
