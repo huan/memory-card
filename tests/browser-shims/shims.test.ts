@@ -21,7 +21,11 @@ import {
   throws,
 } from 'node:assert/strict'
 
-test('Chromium runs without injected Node globals', () => {
+test('Chromium runs without injected Node globals', (t) => {
+  if (typeof process !== 'undefined' && process.versions?.node) {
+    t.skip('Skipped in Node environment')
+    return
+  }
   equal(typeof globalThis.Buffer, 'undefined')
   equal(typeof globalThis.process, 'undefined')
   equal(typeof globalThis.global, 'undefined')
@@ -131,10 +135,11 @@ test('TestContext before hook executes once before sibling subtests', async (t) 
   strictEqual(beforeHookCalls, 1)
 })
 
-test('unsupported mock timer operations fail explicitly', () => {
-  throws(() => mock.timers.enable(), /mock\.timers is not supported/)
-  throws(() => mock.timers.tick(1), /mock\.timers is not supported/)
-  throws(() => mock.timers.reset(), /mock\.timers is not supported/)
+test('unsupported mock timer operations fail explicitly', async () => {
+  const { mock: adapterMock } = await import('./node-test.ts')
+  throws(() => adapterMock.timers.enable(), /mock\.timers is not supported/)
+  throws(() => adapterMock.timers.tick(1), /mock\.timers is not supported/)
+  throws(() => adapterMock.timers.reset(), /mock\.timers is not supported/)
 })
 
 test('subtest skip does not abort sibling subtests in the parent', async (t) => {
@@ -199,6 +204,10 @@ test('test() skips execution when options.todo is a description string', { todo:
 })
 
 test('TestContext subtest skips execution when options.todo is true', async (t) => {
+  if (typeof process !== 'undefined' && process.versions?.node) {
+    t.skip('Skipped in Node environment where native runner executes todo subtests')
+    return
+  }
   let executed = false
   await t.test('subtest with todo', { todo: true }, () => {
     executed = true

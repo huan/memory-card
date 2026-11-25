@@ -35,7 +35,7 @@ export interface MockFunction<T extends (...args: any[]) => any = (...args: any[
 const originalMethods: { obj: any, orig: any, prop: string }[] = []
 
 /** Fails consistently for mock timer operations the browser adapter cannot perform. */
-function unsupportedMockTimers (): never {
+function unsupportedMockTimers (..._args: unknown[]): never {
   throw new Error('mock.timers is not supported in the browser test environment. Use standard browser timers.')
 }
 
