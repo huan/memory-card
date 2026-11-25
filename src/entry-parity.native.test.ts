@@ -57,3 +57,14 @@ test('compile-time subtyping parity: Node MemoryCard is assignable to Web Memory
   const isAssignable: IsAssignable<node.MemoryCard, web.MemoryCard> = true
   assert.ok(isAssignable)
 })
+
+test('Node MemoryCard handles empty storageOptions object and defaults to file storage', async () => {
+  const card = new node.MemoryCard({
+    name: 'test-empty-options-' + Math.random().toString(36).slice(2),
+    storageOptions: {} as any,
+  })
+  await card.load()
+  await card.set('k', 'v')
+  assert.equal(await card.get('k'), 'v')
+  await card.destroy()
+})

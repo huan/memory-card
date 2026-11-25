@@ -95,3 +95,37 @@ test('fromJSON() restores payload and options', async () => {
   assert.equal(await restored.get('hello'), 'world')
   assert.equal(await restored.size, 1)
 })
+
+test('multiplex created before parent.load() shares live payload', async () => {
+  const parent = new MemoryCard({
+    name: 'test-parent-order',
+    storageOptions: { type: 'nop' },
+  })
+  const sub = parent.multiplex('sub')
+  await parent.load()
+
+  await sub.set('key', 'val')
+  assert.equal(await sub.get('key'), 'val')
+  assert.equal(await parent.size, 1)
+
+  // Clear on parent clears sub
+  await parent.clear()
+  assert.equal(await sub.get('key'), undefined)
+  assert.equal(await sub.size, 0)
+})
+
+test('fromJSON() returns typed MemoryCard instance', async () => {
+  const jsonStr = JSON.stringify({
+    options: {
+      name: 'typed-json',
+      storageOptions: { type: 'nop' },
+    },
+    payload: { a: 1 },
+  })
+
+  const restored = MemoryCard.fromJSON(jsonStr)
+  // Directly call MemoryCard methods without (restored as MemoryCard)
+  assert.equal(restored.name, 'typed-json')
+  assert.equal(await restored.get('a'), 1)
+  assert.equal(restored.version(), '0.0.0')
+})

@@ -26,10 +26,14 @@ export class StorageLocalStorage extends StorageBackend {
   }
 
   private getStorage (): Storage {
-    if (typeof globalThis.localStorage === 'undefined') {
-      throw new Error('globalThis.localStorage is not available in the current environment')
+    try {
+      if (typeof globalThis.localStorage !== 'undefined') {
+        return globalThis.localStorage
+      }
+    } catch {
+      // In restricted iframes or privacy modes, accessing globalThis.localStorage throws SecurityError
     }
-    return globalThis.localStorage
+    throw new Error('globalThis.localStorage is not available in the current environment')
   }
 
   override toString (): string {

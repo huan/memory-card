@@ -79,12 +79,12 @@ export class StorageFile extends StorageBackend {
     log.verbose('StorageFile', 'save() to %s', this.absFileName)
 
     const text = JSON.stringify(payload)
-    await fs.promises.mkdir(path.dirname(this.absFileName), { recursive: true })
-    await fs.promises.writeFile(
-      this.absFileName,
-      text,
-      'utf-8',
-    )
+    const dir = path.dirname(this.absFileName)
+    await fs.promises.mkdir(dir, { recursive: true })
+
+    const tmpFile = `${this.absFileName}.tmp.${process.pid}.${Date.now()}`
+    await fs.promises.writeFile(tmpFile, text, 'utf-8')
+    await fs.promises.rename(tmpFile, this.absFileName)
   }
 
   public async destroy (): Promise<void> {
