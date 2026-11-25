@@ -40,7 +40,10 @@ export class MemoryCard implements AsyncMapLike<any, any> {
    */
   static VERSION = VERSION
 
-  static fromJSON (textOrObj: string | MemoryCardJsonObject): AsyncMapLike<any, any> {
+  static fromJSON<T extends typeof MemoryCard> (
+    this: T,
+    textOrObj: string | MemoryCardJsonObject,
+  ): InstanceType<T> {
     log.verbose('MemoryCard', 'static fromJSON(...)')
 
     let jsonObj: MemoryCardJsonObject
@@ -80,7 +83,7 @@ export class MemoryCard implements AsyncMapLike<any, any> {
   name?: string
 
   protected parent?           : MemoryCard
-  protected payload?          : MemoryCardPayload
+  private _payload?          : MemoryCardPayload
   protected storage?          : StorageBackend
   protected multiplexNameList : string[]
   protected options?          : MemoryCardOptions
@@ -101,15 +104,29 @@ export class MemoryCard implements AsyncMapLike<any, any> {
 
     if (options && options.multiplex) {
       this.parent   = options.multiplex.parent
-      this.payload  = this.parent.payload
       this.multiplexNameList = [
         ...this.parent.multiplexNameList,
         options.multiplex.name,
       ]
     } else {
-      this.payload = undefined
+      this._payload = undefined
       this.multiplexNameList = []
     }
+  }
+
+  protected get payload (): MemoryCardPayload | undefined {
+    if (this.isMultiplex() && this.parent) {
+      return this.parent.payload
+    }
+    return this._payload
+  }
+
+  protected set payload (data: MemoryCardPayload | undefined) {
+    if (this.isMultiplex() && this.parent) {
+      this.parent.payload = data
+      return
+    }
+    this._payload = data
   }
 
   toString () {

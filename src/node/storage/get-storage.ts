@@ -23,10 +23,13 @@ async function getStorage (
   log.verbose('getStorage', 'name: %s, options: %s', name, JSON.stringify(options))
 
   if (!name) {
-    if (options.type !== 'nop') {
+    if (options && options.type && options.type !== 'nop') {
       throw new Error('storage have to be `nop` with a un-named storage')
     }
+    options = { type: 'nop' }
     name = 'nop'
+  } else if (!options || !options.type) {
+    options = { ...options, type: 'file' }
   }
 
   if (!options.type || !(options.type in BACKEND_FACTORY_DICT)) {
