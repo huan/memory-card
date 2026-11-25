@@ -5,6 +5,8 @@
  * prototype members.
  */
 import * as assert from 'node:assert/strict'
+import * as os from 'node:os'
+import * as path from 'node:path'
 import { test } from 'node:test'
 
 import * as web from './mod.ts'
@@ -60,7 +62,7 @@ test('compile-time subtyping parity: Node MemoryCard is assignable to Web Memory
 
 test('Node MemoryCard handles empty storageOptions object and defaults to file storage', async () => {
   const card = new node.MemoryCard({
-    name: 'test-empty-options-' + Math.random().toString(36).slice(2),
+    name: path.join(os.tmpdir(), 'test-empty-options-' + Math.random().toString(36).slice(2)),
     storageOptions: {} as any,
   })
   await card.load()
