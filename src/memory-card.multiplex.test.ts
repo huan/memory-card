@@ -1,8 +1,8 @@
 import { test } from 'node:test'
 import * as assert from 'node:assert/strict'
 
+import { MemoryCard } from '#memory-card'
 import {
-  MemoryCard,
   NAMESPACE_KEY_SEPRATOR,
   NAMESPACE_MULTIPLEX_SEPRATOR,
 } from './memory-card.ts'

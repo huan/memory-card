@@ -55,15 +55,22 @@ export class StorageFile extends StorageBackend {
   public async load (): Promise<MemoryCardPayload> {
     log.verbose('StorageFile', 'load() from %s', this.absFileName)
 
+    let text: string
     try {
-      const text = await fs.promises.readFile(this.absFileName, 'utf-8')
-      return JSON.parse(text)
+      text = await fs.promises.readFile(this.absFileName, 'utf-8')
     } catch (err: any) {
       if (err && (err as NodeJS.ErrnoException).code === 'ENOENT') {
         log.verbose('StorageFile', 'load() file not exist, NOOP')
         return {}
       }
-      log.error('StorageFile', 'load() exception: %s', err)
+      log.error('StorageFile', 'load() readFile exception: %s', err)
+      throw err
+    }
+
+    try {
+      return JSON.parse(text)
+    } catch (err) {
+      log.error('StorageFile', 'load() JSON.parse exception: %s', err)
       return {}
     }
   }

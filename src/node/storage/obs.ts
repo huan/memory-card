@@ -1,3 +1,9 @@
+/**
+ * Storage backend implementation for Huawei Cloud Object Storage Service (OBS).
+ *
+ * Owns persistent key-value serialization to Huawei OBS storage buckets under Node.js.
+ * Handles both legacy envelope payloads and modern single-wrapped JSON payloads.
+ */
 /// <reference path="./types.d.ts" />
 import ObsClient from 'esdk-obs-nodejs'
 
@@ -16,6 +22,9 @@ import type {
   StorageObsOptions,
 }                         from '../../storage/backend-config.ts'
 
+/**
+ * Huawei Cloud Object Storage Service (OBS) backend for MemoryCard.
+ */
 export class StorageObs extends StorageBackend {
 
   private obs: any
@@ -47,18 +56,18 @@ export class StorageObs extends StorageBackend {
     return text
   }
 
+  /**
+   * Save payload to Huawei OBS bucket.
+   */
   public async save (payload: MemoryCardPayload): Promise<void> {
     log.verbose('StorageObs', 'save()')
-
-    const options = this.options as StorageObsOptions
-
-    await this.putObject({
-      Body   : JSON.stringify(payload),
-      Bucket : options.bucket,
-      Key    : this.name,
-    })
+    await this.putObject(payload)
   }
 
+  /**
+   * Load payload from Huawei OBS bucket.
+   * Resolves empty object if the object does not exist (404); propagates operational errors.
+   */
   public async load (): Promise<MemoryCardPayload> {
     log.verbose('StorageObs', 'load()')
 
@@ -68,15 +77,17 @@ export class StorageObs extends StorageBackend {
       if (!result) {
         return {}
       }
-      log.info('presss', result)
       return result
     } catch (e) {
       log.warn('StorageObs', 'load() exception: %s', e)
-      return {}
+      throw e
     }
 
   }
 
+  /**
+   * Delete object from Huawei OBS bucket.
+   */
   public async destroy (): Promise<void> {
     log.verbose('StorageObs', 'destroy()')
 
@@ -102,7 +113,7 @@ export class StorageObs extends StorageBackend {
     })
   }
 
-  private async getObject (): Promise<any> {
+  private async getObject (): Promise<MemoryCardPayload | undefined> {
     const options = this.options as StorageObsOptions
     return new Promise((resolve, reject) => {
       this.obs.getObject({
@@ -113,8 +124,24 @@ export class StorageObs extends StorageBackend {
           reject(err)
         } else if (result.CommonMsg.Status < 300) {
           try {
-            const payload = JSON.parse(result.InterfaceResult.Content)
-            resolve(payload)
+            const content = result.InterfaceResult?.Content
+            if (content === undefined || content === null) {
+              resolve(undefined)
+              return
+            }
+            const raw = typeof content === 'string' ? content : content.toString('utf-8')
+            const parsed = JSON.parse(raw)
+            // Support both legacy envelopes { Body: '{"key":"val"}', Bucket, Key } and direct payloads
+            if (parsed && typeof parsed === 'object' && typeof parsed.Body === 'string') {
+              try {
+                const inner = JSON.parse(parsed.Body)
+                resolve(inner as MemoryCardPayload)
+                return
+              } catch {
+                // fall back to parsed if inner Body is not valid JSON
+              }
+            }
+            resolve(parsed as MemoryCardPayload)
           } catch (e) {
             reject(e)
           }

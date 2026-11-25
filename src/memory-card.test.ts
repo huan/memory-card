@@ -76,12 +76,18 @@ test('instantiate MemoryCard with undefined options should get undefined name', 
 })
 
 test('fromJSON() restores payload and options', async () => {
-  const card = new MemoryCard({ name: 'test-json' })
+  const card = new MemoryCard({
+    name: 'test-json',
+    storageOptions: { type: 'nop' },
+  })
   await card.load()
   await card.set('hello', 'world')
 
   const jsonStr = JSON.stringify({
-    options: { name: 'test-json' },
+    options: {
+      name: 'test-json',
+      storageOptions: { type: 'nop' },
+    },
     payload: { hello: 'world' },
   })
 

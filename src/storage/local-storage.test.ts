@@ -31,3 +31,36 @@ test('StorageLocalStorage save, load, destroy', async () => {
     }
   }
 })
+
+test('StorageLocalStorage rejects load, save, destroy when localStorage is unavailable', async () => {
+  const originalLocalStorage = globalThis.localStorage
+
+  // Ensure localStorage is undefined for this test
+  if (globalThis.localStorage) {
+    delete (globalThis as any).localStorage
+  }
+
+  try {
+    const storage = new StorageLocalStorage('unsupported-card', { type: 'localStorage' })
+    await assert.rejects(
+      async () => { await storage.load() },
+      /globalThis\.localStorage is not available/,
+      'load() should reject when localStorage is missing',
+    )
+    await assert.rejects(
+      async () => { await storage.save({ test: 1 }) },
+      /globalThis\.localStorage is not available/,
+      'save() should reject when localStorage is missing',
+    )
+    await assert.rejects(
+      async () => { await storage.destroy() },
+      /globalThis\.localStorage is not available/,
+      'destroy() should reject when localStorage is missing',
+    )
+  } finally {
+    if (originalLocalStorage) {
+      (globalThis as any).localStorage = originalLocalStorage
+    }
+  }
+})
+

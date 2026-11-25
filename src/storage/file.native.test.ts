@@ -39,3 +39,32 @@ test('StorageFile save, load, and destroy', async () => {
   // Clean up directory
   await fs.promises.rm(tmpDir, { recursive: true, force: true })
 })
+
+test('StorageFile load() propagates operational read errors but tolerates malformed JSON', async () => {
+  const tmpDir = path.join(os.tmpdir(), `mc-test-err-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+  await fs.promises.mkdir(tmpDir, { recursive: true })
+
+  try {
+    // 1. Reading a directory instead of a file throws EISDIR
+    const dirCardPath = path.join(tmpDir, 'is-a-directory')
+    const absDirTarget = `${dirCardPath}.memory-card.json`
+    await fs.promises.mkdir(absDirTarget)
+
+    const dirStorage = new StorageFile(dirCardPath, { type: 'file' })
+    await assert.rejects(
+      async () => { await dirStorage.load() },
+      (err: any) => err.code === 'EISDIR',
+      'reading directory path should reject with EISDIR',
+    )
+
+    // 2. Malformed JSON logs and recovers with empty object
+    const malformedPath = path.join(tmpDir, 'malformed')
+    await fs.promises.writeFile(`${malformedPath}.memory-card.json`, '{ broken json', 'utf-8')
+    const malformedStorage = new StorageFile(malformedPath, { type: 'file' })
+    const malformedResult = await malformedStorage.load()
+    assert.deepEqual(malformedResult, {}, 'malformed JSON recovers as empty object')
+  } finally {
+    await fs.promises.rm(tmpDir, { recursive: true, force: true })
+  }
+})
+

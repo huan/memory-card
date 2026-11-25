@@ -25,17 +25,21 @@ export class StorageLocalStorage extends StorageBackend {
     this.key = `memory-card:${this.name}`
   }
 
+  private getStorage (): Storage {
+    if (typeof globalThis.localStorage === 'undefined') {
+      throw new Error('globalThis.localStorage is not available in the current environment')
+    }
+    return globalThis.localStorage
+  }
+
   override toString (): string {
     return `${this.constructor.name}<${this.key}>`
   }
 
   public async load (): Promise<MemoryCardPayload> {
     log.verbose('StorageLocalStorage', 'load() from %s', this.key)
-    if (typeof globalThis.localStorage === 'undefined') {
-      log.verbose('StorageLocalStorage', 'load() globalThis.localStorage is undefined, NOOP')
-      return {}
-    }
-    const text = globalThis.localStorage.getItem(this.key)
+    const storage = this.getStorage()
+    const text = storage.getItem(this.key)
     if (!text) {
       return {}
     }
@@ -49,18 +53,15 @@ export class StorageLocalStorage extends StorageBackend {
 
   public async save (payload: MemoryCardPayload): Promise<void> {
     log.verbose('StorageLocalStorage', 'save() to %s', this.key)
-    if (typeof globalThis.localStorage === 'undefined') {
-      throw new Error('globalThis.localStorage is not available in the current environment')
-    }
+    const storage = this.getStorage()
     const text = JSON.stringify(payload)
-    globalThis.localStorage.setItem(this.key, text)
+    storage.setItem(this.key, text)
   }
 
   public async destroy (): Promise<void> {
     log.verbose('StorageLocalStorage', 'destroy()')
-    if (typeof globalThis.localStorage !== 'undefined') {
-      globalThis.localStorage.removeItem(this.key)
-    }
+    const storage = this.getStorage()
+    storage.removeItem(this.key)
   }
 
 }
