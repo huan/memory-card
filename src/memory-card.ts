@@ -1,18 +1,17 @@
-/* eslint-disable no-use-before-define */
 import type { AsyncMapLike } from 'async-map-like'
 
 import {
   log,
   VERSION,
-}                       from './config.js'
+}                       from './config.ts'
 import {
   getStorage,
   StorageBackend,
-  StorageBackendOptions,
-}                         from './storage/mod.js'
+  type StorageBackendOptions,
+}                         from './storage/mod.ts'
 import type {
   MemoryCardPayload,
-}                       from './types.js'
+}                       from './types.ts'
 
 export const NAMESPACE_MULTIPLEX_SEPRATOR = '\r'
 export const NAMESPACE_KEY_SEPRATOR       = '\n'
@@ -23,7 +22,6 @@ const NAMESPACE_KEY_SEPRATOR_REGEX       = new RegExp(NAMESPACE_KEY_SEPRATOR)
 export interface MemoryCardOptions {
   name?           : string,
   storageOptions? : StorageBackendOptions,
-  // //////////
   multiplex?: {
     parent : MemoryCard,
     name   : string,
@@ -38,11 +36,7 @@ export interface MemoryCardJsonObject {
 export class MemoryCard implements AsyncMapLike<any, any> {
 
   /**
-   *
-   *
    * Static
-   *
-   *
    */
   static VERSION = VERSION
 
@@ -57,7 +51,7 @@ export class MemoryCard implements AsyncMapLike<any, any> {
       jsonObj = textOrObj
     }
 
-    const card = new this(jsonObj.options)
+    const card = new (this as any)(jsonObj.options)
     card.payload = jsonObj.payload
 
     return card
@@ -70,11 +64,7 @@ export class MemoryCard implements AsyncMapLike<any, any> {
   ): T['prototype'] {
     log.verbose('MemoryCard', 'static multiplex(%s, %s)', memory, name)
 
-    // if (!memory.options) {
-    //   throw new Error('can not multiplex a un-named MemoryCard')
-    // }
-
-    const subMemory = new this({
+    const subMemory = new (this as any)({
       ...memory.options,
       multiplex: {
         name,
@@ -85,11 +75,7 @@ export class MemoryCard implements AsyncMapLike<any, any> {
   }
 
   /**
-   *
-   *
    * Instance
-   *
-   *
    */
   name?: string
 
@@ -97,8 +83,7 @@ export class MemoryCard implements AsyncMapLike<any, any> {
   protected payload?          : MemoryCardPayload
   protected storage?          : StorageBackend
   protected multiplexNameList : string[]
-
-  private options?: MemoryCardOptions
+  protected options?          : MemoryCardOptions
 
   constructor (
     options?: string | MemoryCardOptions,
@@ -122,9 +107,7 @@ export class MemoryCard implements AsyncMapLike<any, any> {
         options.multiplex.name,
       ]
     } else {
-      // payload should be undefined before load()
       this.payload = undefined
-
       this.multiplexNameList = []
     }
   }
@@ -144,8 +127,8 @@ export class MemoryCard implements AsyncMapLike<any, any> {
     return VERSION
   }
 
-  private async getStorage (): Promise<undefined | StorageBackend> {
-    log.verbose('MemoryCard', 'getStorage() for storage type: %s',
+  protected async resolveStorage (): Promise<undefined | StorageBackend> {
+    log.verbose('MemoryCard', 'resolveStorage() for storage type: %s',
       (this.options
         && this.options.storageOptions
         && this.options.storageOptions.type
@@ -176,7 +159,7 @@ export class MemoryCard implements AsyncMapLike<any, any> {
     }
 
     if (!this.storage) {
-      this.storage = await this.getStorage()
+      this.storage = await this.resolveStorage()
     }
 
     if (this.storage) {
@@ -216,9 +199,7 @@ export class MemoryCard implements AsyncMapLike<any, any> {
   }
 
   /**
-   *
-   * Multiplexing related functions START
-   *
+   * Multiplexing related functions
    */
   protected isMultiplexKey (key: string): boolean {
     if (NAMESPACE_MULTIPLEX_SEPRATOR_REGEX.test(key)
@@ -262,16 +243,8 @@ export class MemoryCard implements AsyncMapLike<any, any> {
 
   multiplex (name: string): this {
     log.verbose('MemoryCard', 'multiplex(%s)', name)
-
-    // FIXME: as any ?
     return (this.constructor as any).multiplex(this, name)
   }
-
-  /**
-   *
-   * Multiplexing related functions END
-   *
-   */
 
   async destroy (): Promise<void> {
     log.verbose('MemoryCard', 'destroy() storage: %s', this.storage || 'N/A')
@@ -287,20 +260,11 @@ export class MemoryCard implements AsyncMapLike<any, any> {
       this.storage = undefined
     }
 
-    // to prevent to use a destroied card
     this.payload = undefined
   }
 
   /**
-   *
    * ES6 Map API (Async Version)
-   *
-   * BEGIN
-   *
-   */
-
-  /**
-   * size
    */
   get size (): Promise<number> {
     log.verbose('MemoryCard', '<%s> size', this.multiplexPath())
@@ -309,7 +273,7 @@ export class MemoryCard implements AsyncMapLike<any, any> {
       throw new Error('no payload, please call load() first.')
     }
 
-    let count
+    let count: number
 
     if (this.isMultiplex()) {
       count = Object.keys(this.payload)
@@ -329,7 +293,6 @@ export class MemoryCard implements AsyncMapLike<any, any> {
     }
 
     const key = this.resolveKey(name)
-
     return this.payload[key] as any
   }
 
@@ -341,7 +304,6 @@ export class MemoryCard implements AsyncMapLike<any, any> {
     }
 
     const key = this.resolveKey(name)
-
     this.payload[key] = data as any
 
     return this
@@ -422,12 +384,10 @@ export class MemoryCard implements AsyncMapLike<any, any> {
     }
 
     for (const key of Object.keys(this.payload)) {
-      // console.log('key', key)
       if (this.isMultiplex()) {
         if (this.isMultiplexKey(key)) {
           const namespace = this.multiplexNamespace()
-          // `+1` means there's another NAMESPACE_KEY_SEPRATOR we need to trim
-          const mpKey = key.substr(namespace.length + 1)
+          const mpKey = key.slice(namespace.length + 1)
           yield mpKey
         }
         continue
@@ -461,14 +421,6 @@ export class MemoryCard implements AsyncMapLike<any, any> {
       callbackfn.call(thisArg, value, key, this)
     }
   }
-
-  /**
-   *
-   * ES6 Map API (Async Version)
-   *
-   * END
-   *
-   */
 
 }
 

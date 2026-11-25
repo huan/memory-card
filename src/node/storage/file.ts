@@ -1,22 +1,22 @@
-import fs   from 'fs'
-import path from 'path'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
 
 import {
   log,
-}                     from '../config.js'
+}                     from '../../config.ts'
 import type {
   MemoryCardPayload,
-}                     from '../types.js'
+}                     from '../../types.ts'
 
 import {
   StorageBackend,
-}                         from './backend.js'
+}                         from '../../storage/backend.ts'
 import type {
   StorageBackendOptions,
   StorageFileOptions,
-}                         from './backend-config.js'
+}                         from '../../storage/backend-config.ts'
 
-class StorageFile extends StorageBackend {
+export class StorageFile extends StorageBackend {
 
   private readonly absFileName: string
 
@@ -38,7 +38,7 @@ class StorageFile extends StorageBackend {
         this.name,
       )
     if (!/\.memory-card\.json$/.test(this.absFileName)) {
-      this.absFileName +=  '.memory-card.json'
+      this.absFileName += '.memory-card.json'
     }
   }
 
@@ -55,54 +55,50 @@ class StorageFile extends StorageBackend {
   public async load (): Promise<MemoryCardPayload> {
     log.verbose('StorageFile', 'load() from %s', this.absFileName)
 
-    if (!fs.existsSync(this.absFileName)) {
-      log.verbose('MemoryCard', 'load() file not exist, NOOP')
-      return {}
-    }
-
-    const buffer = await new Promise<Buffer>((resolve, reject) => fs.readFile(this.absFileName, (err, buf) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(buf)
+    let text: string
+    try {
+      text = await fs.promises.readFile(this.absFileName, 'utf-8')
+    } catch (err: any) {
+      if (err && (err as NodeJS.ErrnoException).code === 'ENOENT') {
+        log.verbose('StorageFile', 'load() file not exist, NOOP')
+        return {}
       }
-    }))
-    const text = buffer.toString()
-
-    let payload: MemoryCardPayload = {}
+      log.error('StorageFile', 'load() readFile exception: %s', err)
+      throw err
+    }
 
     try {
-      payload = JSON.parse(text)
-    } catch (e) {
-      log.error('MemoryCard', 'load() exception: %s', e)
+      return JSON.parse(text)
+    } catch (err) {
+      log.error('StorageFile', 'load() JSON.parse exception: %s', err)
+      return {}
     }
-    return payload
   }
 
   public async save (payload: MemoryCardPayload): Promise<void> {
     log.verbose('StorageFile', 'save() to %s', this.absFileName)
 
     const text = JSON.stringify(payload)
-    await new Promise<void>((resolve, reject) => {
-      fs.writeFile(
-        this.absFileName,
-        text,
-        err => err ? reject(err) : resolve(),
-      )
-    })
+    await fs.promises.mkdir(path.dirname(this.absFileName), { recursive: true })
+    await fs.promises.writeFile(
+      this.absFileName,
+      text,
+      'utf-8',
+    )
   }
 
   public async destroy (): Promise<void> {
     log.verbose('StorageFile', 'destroy()')
 
-    if (fs.existsSync(this.absFileName)) {
-      fs.unlinkSync(this.absFileName)
+    try {
+      await fs.promises.unlink(this.absFileName)
+    } catch (err: any) {
+      if (err && (err as NodeJS.ErrnoException).code !== 'ENOENT') {
+        throw err
+      }
     }
   }
 
 }
 
 export default StorageFile
-export {
-  StorageFile,
-}

@@ -1,20 +1,24 @@
 import {
   log,
-}                         from '../config.js'
+} from '../config.ts'
 import type {
   MemoryCardPayload,
-}                         from '../types.js'
-
+} from '../types.ts'
 import type {
   StorageBackendOptions,
-}                         from './backend-config.js'
+} from './backend-config.ts'
 
 export abstract class StorageBackend {
 
+  name    : string
+  options : StorageBackendOptions
+
   constructor (
-    protected name    : string,
-    protected options : StorageBackendOptions,
+    name    : string,
+    options : StorageBackendOptions,
   ) {
+    this.name = name
+    this.options = options
     log.verbose('StorageBackend', 'constructor(%s, { type: %s })', name, options.type)
   }
 
@@ -23,3 +27,5 @@ export abstract class StorageBackend {
   public abstract destroy ()                        : Promise<void>
 
 }
+
+export default StorageBackend
