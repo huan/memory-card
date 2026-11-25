@@ -132,7 +132,16 @@ export class StorageObs extends StorageBackend {
             const raw = typeof content === 'string' ? content : content.toString('utf-8')
             const parsed = JSON.parse(raw)
             // Support both legacy envelopes { Body: '{"key":"val"}', Bucket, Key } and direct payloads
-            if (parsed && typeof parsed === 'object' && typeof parsed.Body === 'string') {
+            const isLegacyEnvelope = (
+              parsed &&
+              typeof parsed === 'object' &&
+              !Array.isArray(parsed) &&
+              typeof parsed.Body === 'string' &&
+              parsed.Bucket === options.bucket &&
+              parsed.Key === this.name &&
+              Object.keys(parsed).length === 3
+            )
+            if (isLegacyEnvelope) {
               try {
                 const inner = JSON.parse(parsed.Body)
                 resolve(inner as MemoryCardPayload)
